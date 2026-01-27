@@ -21,10 +21,8 @@
   let signedBy = $state('');
   let signing = $state(false);
 
-  const contractId = $derived(() => {
-    const id = Number($page.params.id);
-    return isNaN(id) ? null : id;
-  });
+  const contractId = $derived(Number($page.params.id));
+  const isValidId = $derived(!isNaN(contractId) && contractId > 0);
 
   const statusColors: Record<ContractStatus, Color> = {
     DRAFT: 'gray',
@@ -63,7 +61,7 @@
   });
 
   const loadContract = async () => {
-    if (contractId === null) {
+    if (!isValidId) {
       error = 'ID de contrato inválido';
       loading = false;
       return;
@@ -72,7 +70,7 @@
     loading = true;
     error = null;
 
-    const result = await contractStore.getById(contractId as unknown as number);
+    const result = await contractStore.getById(contractId);
 
     if (result.ok) {
       contract = result.value;
@@ -85,7 +83,7 @@
 
   const handleSubmit = async (data: CreateContractRequest | UpdateContractRequest) => {
     submitting = true;
-    const result = await contractStore.update(contractId as unknown as number, data as UpdateContractRequest);
+    const result = await contractStore.update(contractId, data as UpdateContractRequest);
     submitting = false;
 
     if (result.ok) {
@@ -104,7 +102,7 @@
     }
 
     signing = true;
-    const result = await contractStore.sign(contractId as unknown as number, signedBy);
+    const result = await contractStore.sign(contractId, signedBy);
     signing = false;
 
     if (result.ok) {
@@ -124,7 +122,7 @@
 
     activating = true;
     try {
-      const result = await contractStore.updateStatus(contractId as unknown as number, 'ACTIVE');
+      const result = await contractStore.updateStatus(contractId, 'ACTIVE');
       if (result.ok) {
         contract = result.value;
         toastStore.success('Contrato ativado com sucesso!');
