@@ -39,21 +39,29 @@
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4
+           bg-black/90 backdrop-blur-md"
     onclick={handleBackdropClick}
   >
     <div
-      class="bg-white rounded-lg shadow-xl w-full {sizes[size]} max-h-[90vh] flex flex-col"
+      class="relative w-full {sizes[size]} max-h-[90vh] flex flex-col
+             rounded-2xl overflow-hidden
+             bg-[#0a0a0a]
+             border border-[#00d4ff]/30
+             shadow-[0_0_60px_rgba(0,212,255,0.15)]"
       role="dialog"
       aria-modal="true"
       aria-labelledby={title ? 'modal-title' : undefined}
     >
       {#if title}
-        <header class="flex items-center justify-between px-6 py-4 border-b">
-          <h2 id="modal-title" class="text-lg font-semibold text-gray-900">{title}</h2>
+        <header class="flex items-center justify-between px-6 py-4 
+                       border-b border-[#1a1a1a]">
+          <h2 id="modal-title" class="text-lg font-bold text-[#00d4ff] tracking-wide">{title}</h2>
           <button
             type="button"
-            class="p-1 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100 transition-colors"
+            class="p-1.5 text-[#5a5a5a] hover:text-[#ff0080] 
+                   rounded-lg hover:bg-[#1a1a1a] 
+                   transition-all duration-200"
             onclick={onClose}
             aria-label="Close"
           >
@@ -62,12 +70,12 @@
         </header>
       {/if}
 
-      <div class="flex-1 overflow-y-auto px-6 py-4">
+      <div class="flex-1 overflow-y-auto px-6 py-5 text-[#c4c4c4]">
         {@render children()}
       </div>
 
       {#if footer}
-        <footer class="px-6 py-4 border-t bg-gray-50 rounded-b-lg">
+        <footer class="px-6 py-4 border-t border-[#1a1a1a] bg-[#050505]">
           {@render footer()}
         </footer>
       {/if}

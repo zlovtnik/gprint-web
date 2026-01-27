@@ -13,11 +13,14 @@
   let { title = 'Erro', message, onRetry, children }: Props = $props();
 </script>
 
-<div class="flex flex-col items-center justify-center p-8 text-center" role="alert">
-  <AlertCircle class="h-12 w-12 text-red-500 mb-4" />
-  <h3 class="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
+<div class="flex flex-col items-center justify-center p-12 text-center" role="alert">
+  <div class="p-4 rounded-2xl bg-[#ff0080]/10 border border-[#ff0080]/30 mb-5
+              shadow-[0_0_20px_rgba(255,0,128,0.2)]">
+    <AlertCircle class="h-10 w-10 text-[#ff0080] drop-shadow-[0_0_8px_rgba(255,0,128,0.8)]" />
+  </div>
+  <h3 class="text-lg font-bold text-[#ff0080] mb-2 uppercase tracking-wide">{title}</h3>
   {#if message}
-    <p class="text-gray-600 mb-4 max-w-md">{message}</p>
+    <p class="text-[#787878] mb-5 max-w-md text-sm leading-relaxed">{message}</p>
   {/if}
   {#if children}
     {@render children()}

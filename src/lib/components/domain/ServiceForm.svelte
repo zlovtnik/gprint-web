@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Service, CreateServiceRequest, UpdateServiceRequest } from '$lib/types/service';
+  import type { Service, CreateServiceRequest, UpdateServiceRequest, PriceUnit } from '$lib/types/service';
   import { createServiceSchema, type CreateServiceInput } from '$lib/schemas/service';
   import { Button, Input, Select, Textarea } from '$lib/components/ui';
 
@@ -19,22 +19,13 @@
     serviceCode: service?.serviceCode ?? '',
     name: service?.name ?? '',
     description: service?.description ?? '',
-    serviceType: service?.serviceType ?? 'PRINT',
-    unitType: service?.unitType ?? 'PAGE',
-    unitPrice: service?.unitPrice ?? ''
+    priceUnit: service?.priceUnit ?? 'PAGE',
+    unitPrice: service?.unitPrice !== undefined ? String(service.unitPrice) : ''
   });
 
   let errors = $state<Record<string, string>>({});
 
-  const serviceTypeOptions = [
-    { value: 'PRINT', label: 'Impressão' },
-    { value: 'SCAN', label: 'Digitalização' },
-    { value: 'COPY', label: 'Cópia' },
-    { value: 'FAX', label: 'Fax' },
-    { value: 'OTHER', label: 'Outro' }
-  ];
-
-  const unitTypeOptions = [
+  const priceUnitOptions = [
     { value: 'UNIT', label: 'Unidade' },
     { value: 'PAGE', label: 'Página' },
     { value: 'HOUR', label: 'Hora' },
@@ -59,16 +50,13 @@
       return;
     }
 
-    // Build properly typed payload
+    // Build properly typed payload - unitPrice as number
     const payload: CreateServiceRequest | UpdateServiceRequest = {
       serviceCode: form.serviceCode,
       name: form.name,
       description: form.description || undefined,
-      serviceType: form.serviceType as 'PRINT' | 'SCAN' | 'COPY' | 'FAX' | 'OTHER',
-      unitType: form.unitType as 'UNIT' | 'PAGE' | 'HOUR' | 'PROJECT' | 'MONTHLY',
-      unitPrice: typeof form.unitPrice === 'string' 
-        ? form.unitPrice 
-        : String(form.unitPrice)
+      priceUnit: form.priceUnit as PriceUnit,
+      unitPrice: Number(form.unitPrice)
     };
 
     try {
@@ -101,20 +89,12 @@
     />
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <Select
-      label="Tipo"
-      bind:value={form.serviceType}
-      options={serviceTypeOptions}
-      error={errors.serviceType}
-      required
-    />
-
-    <Select
-      label="Unidade"
-      bind:value={form.unitType}
-      options={unitTypeOptions}
-      error={errors.unitType}
+      label="Unidade de Preço"
+      bind:value={form.priceUnit}
+      options={priceUnitOptions}
+      error={errors.priceUnit}
       required
     />
 
@@ -138,7 +118,7 @@
   />
 
   <!-- Actions -->
-  <div class="flex items-center justify-end gap-3 pt-4 border-t">
+  <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#1a1a1a]">
     <Button variant="outline" type="button" onclick={onCancel}>
       {#snippet children()}Cancelar{/snippet}
     </Button>

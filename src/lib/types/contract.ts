@@ -46,6 +46,7 @@ export interface Contract {
 }
 
 export interface CreateContractRequest {
+  readonly contractNumber: string;
   readonly customerId: number;
   readonly contractType: ContractType;
   readonly startDate: string;

@@ -65,7 +65,19 @@
       return;
     }
 
-    await onSubmit(validation.data as CreateCustomerRequest | UpdateCustomerRequest);
+    // Clean up empty optional fields - backend doesn't accept empty strings
+    const data = { ...validation.data };
+    if (data.tradeName === '') delete data.tradeName;
+    if (data.stateReg === '') delete data.stateReg;
+    if (data.municipalReg === '') delete data.municipalReg;
+    if (data.phone === '') delete data.phone;
+    if (data.mobile === '') delete data.mobile;
+    if (data.notes === '') delete data.notes;
+    if (data.address) {
+      if (data.address.complement === '') delete data.address.complement;
+    }
+
+    await onSubmit(data as CreateCustomerRequest | UpdateCustomerRequest);
   };
 </script>
 

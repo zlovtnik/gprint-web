@@ -3,7 +3,7 @@
   import { page } from '$app/stores';
   import { serviceStore } from '$lib/stores/services.svelte';
   import { toastStore } from '$lib/stores/toast.svelte';
-  import type { Service, CreateServiceRequest, UpdateServiceRequest } from '$lib/types/service';
+  import type { Service, CreateServiceRequest, UpdateServiceRequest, PriceUnit } from '$lib/types/service';
   import { Card, Spinner, ErrorMessage, Button, Badge } from '$lib/components/ui';
   import { ServiceForm } from '$lib/components/domain';
   import { formatCurrency } from '$lib/utils/format';
@@ -17,15 +17,7 @@
 
   const serviceId = $derived(Number($page.params.id));
 
-  const typeLabels: Record<string, string> = {
-    PRINT: 'Impressão',
-    SCAN: 'Digitalização',
-    COPY: 'Cópia',
-    FAX: 'Fax',
-    OTHER: 'Outro'
-  };
-
-  const unitLabels: Record<string, string> = {
+  const unitLabels: Record<PriceUnit, string> = {
     UNIT: 'Unidade',
     PAGE: 'Página',
     HOUR: 'Hora',
@@ -161,19 +153,15 @@
         <!-- Display service details -->
         <div class="space-y-6">
           <section>
-            <h3 class="text-sm font-medium text-gray-500 mb-3">Informações do Serviço</h3>
-            <dl class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <h3 class="text-sm font-medium text-electric-cyan/70 mb-3">Informações do Serviço</h3>
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <dt class="text-sm text-gray-500">Tipo</dt>
-                <dd class="text-gray-900">{typeLabels[service.serviceType]}</dd>
+                <dt class="text-sm text-electric-cyan/50">Unidade de Preço</dt>
+                <dd class="text-white">{unitLabels[service.priceUnit]}</dd>
               </div>
               <div>
-                <dt class="text-sm text-gray-500">Unidade</dt>
-                <dd class="text-gray-900">{unitLabels[service.unitType]}</dd>
-              </div>
-              <div>
-                <dt class="text-sm text-gray-500">Preço Unitário</dt>
-                <dd class="text-xl font-semibold text-gray-900">
+                <dt class="text-sm text-electric-cyan/50">Preço Unitário</dt>
+                <dd class="text-xl font-semibold text-neon-green">
                   {formatCurrency('BRL')(service.unitPrice)}
                 </dd>
               </div>
@@ -182,8 +170,8 @@
 
           {#if service.description}
             <section>
-              <h3 class="text-sm font-medium text-gray-500 mb-3">Descrição</h3>
-              <p class="text-gray-900 whitespace-pre-wrap">{service.description}</p>
+              <h3 class="text-sm font-medium text-electric-cyan/70 mb-3">Descrição</h3>
+              <p class="text-white/80 whitespace-pre-wrap">{service.description}</p>
             </section>
           {/if}
         </div>

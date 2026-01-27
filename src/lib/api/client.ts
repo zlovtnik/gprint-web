@@ -56,7 +56,9 @@ export const fetchApi = async <T>(
   options?: Parameters<typeof api>[1]
 ): Promise<Result<T, ApiError>> => {
   try {
-    const response = await api(endpoint, options).json<ApiResponse<T>>();
+    const rawResponse = await api(endpoint, options).json<ApiResponse<unknown>>();
+    // Convert snake_case keys to camelCase for frontend consumption
+    const response = toCamelCaseKeys(rawResponse) as ApiResponse<T>;
 
     if (response.success && response.data !== undefined) {
       return Ok(response.data);
@@ -107,6 +109,72 @@ export const fetchPaginated = async <T>(
   return fetchApi<PaginatedResponse<T>>(endpoint, options);
 };
 
+// Convert camelCase to snake_case
+const toSnakeCase = (str: string): string =>
+  str.replaceAll(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
+// Convert snake_case to camelCase
+const toCamelCase = (str: string): string =>
+  str.replaceAll(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+
+// Deep convert object keys from camelCase to snake_case
+const toSnakeCaseKeys = <T>(obj: T): T => {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+  
+  if (Array.isArray(obj)) {
+    return obj.map(toSnakeCaseKeys) as T;
+  }
+  
+  if (typeof obj === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+      const snakeKey = toSnakeCase(key);
+      result[snakeKey] = toSnakeCaseKeys(value);
+    }
+    return result as T;
+  }
+  
+  return obj;
+};
+
+// Deep convert object keys from snake_case to camelCase
+const toCamelCaseKeys = <T>(obj: T): T => {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+  
+  if (Array.isArray(obj)) {
+    return obj.map(toCamelCaseKeys) as T;
+  }
+  
+  if (typeof obj === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+      const camelKey = toCamelCase(key);
+      result[camelKey] = toCamelCaseKeys(value);
+    }
+    return result as T;
+  }
+  
+  return obj;
+};
+
+// Wrap fetchApi to auto-convert request body keys to snake_case
+export const fetchApiSnake = async <T>(
+  endpoint: string,
+  options?: Parameters<typeof api>[1] & { json?: unknown }
+): Promise<Result<T, ApiError>> => {
+  const transformedOptions = options ? { ...options } : undefined;
+  
+  if (transformedOptions?.json) {
+    transformedOptions.json = toSnakeCaseKeys(transformedOptions.json);
+  }
+  
+  return fetchApi<T>(endpoint, transformedOptions);
+};
+
 // Build URL search params
 export const buildSearchParams = <T extends Record<string, string | number | boolean | undefined>>(
   params: T
@@ -116,7 +184,7 @@ export const buildSearchParams = <T extends Record<string, string | number | boo
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined) {
       // Convert camelCase to snake_case for API compatibility
-      const snakeKey = key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+      const snakeKey = toSnakeCase(key);
       searchParams.set(snakeKey, String(value));
     }
   }

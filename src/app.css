@@ -1,15 +1,322 @@
 @import 'tailwindcss';
 
-/* Brand color customizations */
+/* ═══════════════════════════════════════════════════════════════════════════
+   NEON NIGHTS - Electric Cyberpunk Theme
+   Inspired by: Blade Runner, Cyberpunk 2077, Tron Legacy
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @theme {
-  --color-brand-50: #f0f9ff;
-  --color-brand-100: #e0f2fe;
-  --color-brand-200: #bae6fd;
-  --color-brand-300: #7dd3fc;
-  --color-brand-400: #38bdf8;
-  --color-brand-500: #0ea5e9;
-  --color-brand-600: #0284c7;
-  --color-brand-700: #0369a1;
-  --color-brand-800: #075985;
-  --color-brand-900: #0c4a6e;
+  /* ─────────────────────────────────────────────────────────────────────────
+     ELECTRIC NEON PALETTE
+     ───────────────────────────────────────────────────────────────────────── */
+  
+  /* Electric Cyan - Primary brand color */
+  --color-electric-50: #e0fcff;
+  --color-electric-100: #bef8fd;
+  --color-electric-200: #87eaf2;
+  --color-electric-300: #54d1db;
+  --color-electric-400: #38bec9;
+  --color-electric-500: #00d4ff;
+  --color-electric-600: #00b8db;
+  --color-electric-700: #0987a0;
+  --color-electric-800: #086f83;
+  --color-electric-900: #065666;
+
+  /* Hot Magenta - Accent/Danger */
+  --color-hot-50: #ffe0f0;
+  --color-hot-100: #ffb8d9;
+  --color-hot-200: #ff8ac2;
+  --color-hot-300: #ff5caa;
+  --color-hot-400: #ff2e93;
+  --color-hot-500: #ff0080;
+  --color-hot-600: #db006e;
+  --color-hot-700: #b8005c;
+  --color-hot-800: #94004a;
+  --color-hot-900: #700038;
+
+  /* Ultraviolet - Secondary */
+  --color-uv-50: #f0e0ff;
+  --color-uv-100: #d9b8ff;
+  --color-uv-200: #c28aff;
+  --color-uv-300: #ab5cff;
+  --color-uv-400: #942eff;
+  --color-uv-500: #8000ff;
+  --color-uv-600: #6e00db;
+  --color-uv-700: #5c00b8;
+  --color-uv-800: #4a0094;
+  --color-uv-900: #380070;
+
+  /* Neon Green - Success */
+  --color-neon-50: #e0ffe0;
+  --color-neon-100: #b8ffb8;
+  --color-neon-200: #8aff8a;
+  --color-neon-300: #5cff5c;
+  --color-neon-400: #39ff14;
+  --color-neon-500: #00ff00;
+  --color-neon-600: #00db00;
+  --color-neon-700: #00b800;
+  --color-neon-800: #009400;
+  --color-neon-900: #007000;
+
+  /* Warning Orange */
+  --color-warn-400: #ff9500;
+  --color-warn-500: #ff7b00;
+
+  /* Abyss - Pure dark backgrounds */
+  --color-abyss-50: #e8e8e8;
+  --color-abyss-100: #c4c4c4;
+  --color-abyss-200: #a0a0a0;
+  --color-abyss-300: #787878;
+  --color-abyss-400: #5a5a5a;
+  --color-abyss-500: #3d3d3d;
+  --color-abyss-600: #2a2a2a;
+  --color-abyss-700: #1a1a1a;
+  --color-abyss-800: #0d0d0d;
+  --color-abyss-850: #080808;
+  --color-abyss-900: #050505;
+  --color-abyss-950: #020202;
+  --color-abyss-black: #000000;
+
+  /* Aliases for backwards compatibility */
+  --color-brand-50: var(--color-electric-50);
+  --color-brand-100: var(--color-electric-100);
+  --color-brand-200: var(--color-electric-200);
+  --color-brand-300: var(--color-electric-300);
+  --color-brand-400: var(--color-electric-400);
+  --color-brand-500: var(--color-electric-500);
+  --color-brand-600: var(--color-electric-600);
+  --color-brand-700: var(--color-electric-700);
+  --color-brand-800: var(--color-electric-800);
+  --color-brand-900: var(--color-electric-900);
+
+  --color-cyber-400: var(--color-electric-400);
+  --color-cyber-500: var(--color-electric-500);
+  --color-cyber-600: var(--color-electric-600);
+
+  --color-magenta-400: var(--color-hot-400);
+  --color-magenta-500: var(--color-hot-500);
+  --color-magenta-600: var(--color-hot-600);
+
+  --color-violet-400: var(--color-uv-400);
+  --color-violet-500: var(--color-uv-500);
+  --color-violet-600: var(--color-uv-600);
+
+  --color-success-400: var(--color-neon-400);
+  --color-success-500: var(--color-neon-500);
+  --color-success-600: var(--color-neon-600);
+
+  --color-danger-400: var(--color-hot-400);
+  --color-danger-500: var(--color-hot-500);
+  --color-danger-600: var(--color-hot-600);
+
+  --color-warning-400: var(--color-warn-400);
+  --color-warning-500: var(--color-warn-500);
+
+  --color-void-100: var(--color-abyss-100);
+  --color-void-200: var(--color-abyss-200);
+  --color-void-300: var(--color-abyss-300);
+  --color-void-400: var(--color-abyss-400);
+  --color-void-500: var(--color-abyss-500);
+  --color-void-600: var(--color-abyss-600);
+  --color-void-700: var(--color-abyss-700);
+  --color-void-800: var(--color-abyss-800);
+  --color-void-850: var(--color-abyss-850);
+  --color-void-900: var(--color-abyss-900);
+  --color-void-950: var(--color-abyss-950);
+  --color-void-black: var(--color-abyss-black);
+
+  --color-dark-100: var(--color-abyss-100);
+  --color-dark-200: var(--color-abyss-200);
+  --color-dark-300: var(--color-abyss-300);
+  --color-dark-400: var(--color-abyss-400);
+  --color-dark-500: var(--color-abyss-500);
+  --color-dark-600: var(--color-abyss-600);
+  --color-dark-700: var(--color-abyss-700);
+  --color-dark-800: var(--color-abyss-800);
+  --color-dark-850: var(--color-abyss-850);
+  --color-dark-900: var(--color-abyss-900);
+  --color-dark-950: var(--color-abyss-950);
+
+  --color-neon-green-400: var(--color-neon-400);
+  --color-neon-green-500: var(--color-neon-500);
+  --color-neon-green-600: var(--color-neon-600);
+  --color-neon-violet-400: var(--color-uv-400);
+  --color-neon-violet-500: var(--color-uv-500);
+  --color-neon-violet-600: var(--color-uv-600);
+  --color-neon-pink-400: var(--color-hot-400);
+  --color-neon-pink-500: var(--color-hot-500);
+  --color-neon-pink-600: var(--color-hot-600);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   BASE STYLES
+   ───────────────────────────────────────────────────────────────────────── */
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: #000000;
+  color: #e8e8e8;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   NEON GLOW EFFECTS - The signature look
+   ───────────────────────────────────────────────────────────────────────── */
+
+.glow-electric {
+  box-shadow: 
+    0 0 5px #00d4ff,
+    0 0 10px #00d4ff,
+    0 0 20px #00d4ff,
+    0 0 40px rgba(0, 212, 255, 0.5);
+}
+
+.glow-hot {
+  box-shadow: 
+    0 0 5px #ff0080,
+    0 0 10px #ff0080,
+    0 0 20px #ff0080,
+    0 0 40px rgba(255, 0, 128, 0.5);
+}
+
+.glow-uv {
+  box-shadow: 
+    0 0 5px #8000ff,
+    0 0 10px #8000ff,
+    0 0 20px #8000ff,
+    0 0 40px rgba(128, 0, 255, 0.5);
+}
+
+.glow-neon {
+  box-shadow: 
+    0 0 5px #39ff14,
+    0 0 10px #39ff14,
+    0 0 20px #39ff14,
+    0 0 40px rgba(57, 255, 20, 0.5);
+}
+
+/* Text glow */
+.text-glow-electric {
+  text-shadow: 
+    0 0 5px #00d4ff,
+    0 0 10px #00d4ff,
+    0 0 20px rgba(0, 212, 255, 0.8);
+}
+
+.text-glow-hot {
+  text-shadow: 
+    0 0 5px #ff0080,
+    0 0 10px #ff0080,
+    0 0 20px rgba(255, 0, 128, 0.8);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   SCROLLBAR - Neon styled
+   ───────────────────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0d0d0d;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00d4ff 0%, #ff0080 100%);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #00ffff 0%, #ff00aa 100%);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   GLASS PANELS
+   ───────────────────────────────────────────────────────────────────────── */
+
+.glass {
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   NEON BORDERS
+   ───────────────────────────────────────────────────────────────────────── */
+
+.border-glow-electric {
+  border: 1px solid rgba(0, 212, 255, 0.5);
+  box-shadow: 
+    inset 0 0 10px rgba(0, 212, 255, 0.1),
+    0 0 10px rgba(0, 212, 255, 0.2);
+}
+
+.border-glow-hot {
+  border: 1px solid rgba(255, 0, 128, 0.5);
+  box-shadow: 
+    inset 0 0 10px rgba(255, 0, 128, 0.1),
+    0 0 10px rgba(255, 0, 128, 0.2);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   GRADIENTS
+   ───────────────────────────────────────────────────────────────────────── */
+
+.gradient-neon-line {
+  background: linear-gradient(90deg, #00d4ff 0%, #8000ff 50%, #ff0080 100%);
+}
+
+.gradient-electric-hot {
+  background: linear-gradient(135deg, #00d4ff 0%, #ff0080 100%);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   ANIMATIONS
+   ───────────────────────────────────────────────────────────────────────── */
+
+@keyframes neon-pulse {
+  0%, 100% { 
+    opacity: 1; 
+    filter: brightness(1);
+  }
+  50% { 
+    opacity: 0.8; 
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+  }
+  50% { 
+    box-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+  }
+}
+
+@keyframes scan-line {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+.animate-neon-pulse {
+  animation: neon-pulse 2s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   SELECTION
+   ───────────────────────────────────────────────────────────────────────── */
+
+::selection {
+  background: rgba(0, 212, 255, 0.4);
+  color: white;
 }

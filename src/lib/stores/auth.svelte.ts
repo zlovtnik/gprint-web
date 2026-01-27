@@ -1,5 +1,5 @@
 // Auth store with JWT management
-import { setAuthToken, setOnUnauthorized } from '$lib/api/client';
+import { setAuthToken, setOnUnauthorized, resetLogoutGuard } from '$lib/api/client';
 import { authApi } from '$lib/api/auth';
 import { goto } from '$app/navigation';
 
@@ -87,10 +87,16 @@ const safeLocalStorage = {
 const createAuthStore = () => {
   // Initialize from localStorage if available
   const storedToken = safeLocalStorage.getItem(TOKEN_KEY);
+  const validToken = storedToken && !isTokenExpired(storedToken) ? storedToken : null;
+
+  // IMPORTANT: Sync token to API client on initialization
+  if (validToken) {
+    setAuthToken(validToken);
+  }
 
   let state = $state<AuthState>({
-    token: storedToken && !isTokenExpired(storedToken) ? storedToken : null,
-    user: storedToken && !isTokenExpired(storedToken) ? parseToken(storedToken) : null,
+    token: validToken,
+    user: validToken ? parseToken(validToken) : null,
     loading: false
   });
 
@@ -119,9 +125,20 @@ const createAuthStore = () => {
       const result = await authApi.login({ username, password });
 
       if (result.ok) {
-        state.token = result.value.token;
-        state.user = parseToken(result.value.token);
-        syncToken(state.token);
+        const parsedUser = parseToken(result.value.access_token);
+        if (parsedUser) {
+          state.token = result.value.access_token;
+          state.user = parsedUser;
+          syncToken(state.token);
+          // Reset the logout guard so 401s can be handled again
+          resetLogoutGuard();
+        } else {
+          // Token parsing failed - clear any existing auth state
+          console.error('Failed to parse user from access token');
+          state.token = null;
+          state.user = null;
+          syncToken(null);
+        }
       }
 
       return result;

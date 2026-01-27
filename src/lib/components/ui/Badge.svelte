@@ -13,13 +13,13 @@
   let { color = 'gray', size = 'md', children }: Props = $props();
 
   const colors: Record<Color, string> = {
-    gray: 'bg-gray-100 text-gray-800',
-    green: 'bg-green-100 text-green-800',
-    yellow: 'bg-yellow-100 text-yellow-800',
-    red: 'bg-red-100 text-red-800',
-    blue: 'bg-blue-100 text-blue-800',
-    orange: 'bg-orange-100 text-orange-800',
-    purple: 'bg-purple-100 text-purple-800'
+    gray: 'bg-[#1a1a1a] text-[#a0a0a0] border border-[#2a2a2a]',
+    green: 'bg-[#39ff14]/10 text-[#39ff14] border border-[#39ff14]/30 shadow-[0_0_8px_rgba(57,255,20,0.2)]',
+    yellow: 'bg-[#ff9500]/10 text-[#ff9500] border border-[#ff9500]/30 shadow-[0_0_8px_rgba(255,149,0,0.2)]',
+    red: 'bg-[#ff0080]/10 text-[#ff0080] border border-[#ff0080]/30 shadow-[0_0_8px_rgba(255,0,128,0.2)]',
+    blue: 'bg-[#00d4ff]/10 text-[#00d4ff] border border-[#00d4ff]/30 shadow-[0_0_8px_rgba(0,212,255,0.2)]',
+    orange: 'bg-[#ff7b00]/10 text-[#ff7b00] border border-[#ff7b00]/30 shadow-[0_0_8px_rgba(255,123,0,0.2)]',
+    purple: 'bg-[#8000ff]/10 text-[#8000ff] border border-[#8000ff]/30 shadow-[0_0_8px_rgba(128,0,255,0.2)]'
   };
 
   const sizes: Record<Size, string> = {

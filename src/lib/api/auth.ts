@@ -9,8 +9,12 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  token: string;
-  expiresAt: string;
+  access_token: string;
+  expires_in: number;
+  refresh_token: string;
+  token_type: string;
+  tenant_id: string;
+  user: string;
 }
 
 export interface UserInfo {

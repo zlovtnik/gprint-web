@@ -25,12 +25,21 @@
   }: Props = $props();
 
   const variants: Record<Variant, string> = {
-    primary: 'bg-brand-600 text-white hover:bg-brand-700 focus:ring-brand-500',
-    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-400',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-    ghost: 'bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-400',
-    outline:
-      'bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-400'
+    primary: `bg-[#00d4ff] text-black font-bold
+              hover:bg-[#00ffff] hover:shadow-[0_0_20px_#00d4ff,0_0_40px_rgba(0,212,255,0.4)]
+              border border-[#00d4ff]/50`,
+    secondary: `bg-[#8000ff] text-white font-bold
+                hover:bg-[#9933ff] hover:shadow-[0_0_20px_#8000ff,0_0_40px_rgba(128,0,255,0.4)]
+                border border-[#8000ff]/50`,
+    danger: `bg-[#ff0080] text-white font-bold
+             hover:bg-[#ff33aa] hover:shadow-[0_0_20px_#ff0080,0_0_40px_rgba(255,0,128,0.4)]
+             border border-[#ff0080]/50`,
+    ghost: `bg-transparent text-[#a0a0a0]
+            hover:text-[#00d4ff] hover:bg-[#1a1a1a]
+            border border-transparent`,
+    outline: `bg-transparent text-[#00d4ff]
+              border border-[#00d4ff]/50
+              hover:bg-[#00d4ff]/10 hover:shadow-[0_0_15px_rgba(0,212,255,0.3)]`
   };
 
   const sizes: Record<Size, string> = {
@@ -41,9 +50,10 @@
 </script>
 
 <button
-  class="inline-flex items-center justify-center rounded-md font-medium
-         transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2
-         disabled:opacity-50 disabled:pointer-events-none cursor-pointer
+  class="inline-flex items-center justify-center rounded-lg font-medium uppercase tracking-wider
+         transition-all duration-200 ease-out
+         focus:outline-none focus:ring-2 focus:ring-[#00d4ff]/60 focus:ring-offset-2 focus:ring-offset-black
+         disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none cursor-pointer
          {variants[variant]} {sizes[size]} {className}"
   disabled={disabled || loading}
   aria-busy={loading}

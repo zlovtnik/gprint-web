@@ -1,5 +1,5 @@
 // Services API
-import { fetchApi, buildSearchParams } from './client';
+import { fetchApi, fetchApiSnake, buildSearchParams } from './client';
 import type { PaginatedResponse, ApiError } from '$lib/types/api';
 import type { Service, CreateServiceRequest, UpdateServiceRequest } from '$lib/types/service';
 import type { Result } from '$lib/utils/result';
@@ -9,7 +9,6 @@ export interface ListServicesParams {
   pageSize?: number;
   search?: string;
   active?: boolean;
-  serviceType?: string;
   [key: string]: string | number | boolean | undefined;
 }
 
@@ -21,13 +20,13 @@ export const servicesApi = {
     fetchApi(`api/v1/services/${id}`),
 
   create: (data: CreateServiceRequest): Promise<Result<Service, ApiError>> =>
-    fetchApi('api/v1/services', {
+    fetchApiSnake('api/v1/services', {
       method: 'POST',
       json: data
     }),
 
   update: (id: number, data: UpdateServiceRequest): Promise<Result<Service, ApiError>> =>
-    fetchApi(`api/v1/services/${id}`, {
+    fetchApiSnake(`api/v1/services/${id}`, {
       method: 'PUT',
       json: data
     }),

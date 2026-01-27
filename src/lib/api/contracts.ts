@@ -1,5 +1,5 @@
 // Contracts API
-import { fetchApi, buildSearchParams } from './client';
+import { fetchApi, fetchApiSnake, buildSearchParams } from './client';
 import type { PaginatedResponse, ApiError } from '$lib/types/api';
 import type {
   Contract,
@@ -32,13 +32,13 @@ export const contractsApi = {
     fetchApi(`api/v1/contracts/${id}`),
 
   create: (data: CreateContractRequest): Promise<Result<Contract, ApiError>> =>
-    fetchApi('api/v1/contracts', {
+    fetchApiSnake('api/v1/contracts', {
       method: 'POST',
       json: data
     }),
 
   update: (id: number, data: UpdateContractRequest): Promise<Result<Contract, ApiError>> =>
-    fetchApi(`api/v1/contracts/${id}`, {
+    fetchApiSnake(`api/v1/contracts/${id}`, {
       method: 'PUT',
       json: data
     }),
@@ -47,15 +47,15 @@ export const contractsApi = {
     fetchApi(`api/v1/contracts/${id}`, { method: 'DELETE' }),
 
   updateStatus: (id: number, status: ContractStatus): Promise<Result<Contract, ApiError>> =>
-    fetchApi(`api/v1/contracts/${id}/status`, {
+    fetchApiSnake(`api/v1/contracts/${id}/status`, {
       method: 'PATCH',
       json: { status }
     }),
 
   sign: (id: number, signedBy: string): Promise<Result<Contract, ApiError>> =>
-    fetchApi(`api/v1/contracts/${id}/sign`, {
+    fetchApiSnake(`api/v1/contracts/${id}/sign`, {
       method: 'POST',
-      json: { signed_by: signedBy }
+      json: { signedBy }
     }),
 
   getHistory: (id: number): Promise<Result<ContractHistory[], ApiError>> =>
@@ -63,7 +63,7 @@ export const contractsApi = {
 
   // Contract items
   addItem: (contractId: number, item: AddContractItemRequest): Promise<Result<ContractItem, ApiError>> =>
-    fetchApi(`api/v1/contracts/${contractId}/items`, {
+    fetchApiSnake(`api/v1/contracts/${contractId}/items`, {
       method: 'POST',
       json: item
     }),
@@ -73,7 +73,7 @@ export const contractsApi = {
     itemId: number,
     item: Partial<AddContractItemRequest>
   ): Promise<Result<ContractItem, ApiError>> =>
-    fetchApi(`api/v1/contracts/${contractId}/items/${itemId}`, {
+    fetchApiSnake(`api/v1/contracts/${contractId}/items/${itemId}`, {
       method: 'PUT',
       json: item
     }),

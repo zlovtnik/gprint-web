@@ -55,18 +55,40 @@
   <title>Login - gprint</title>
 </svelte:head>
 
-<div class="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-  <Card class="w-full max-w-md">
-    <div class="p-8">
+<div class="min-h-screen flex items-center justify-center px-4 relative overflow-hidden bg-black">
+  <!-- Scan line effect -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.02]">
+    <div class="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(255,255,255,0.1)_2px,rgba(255,255,255,0.1)_4px)]"></div>
+  </div>
+  
+  <!-- Electric grid -->
+  <div class="absolute inset-0 bg-[linear-gradient(rgba(0,212,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(0,212,255,0.08)_1px,transparent_1px)] bg-[size:80px_80px]"></div>
+  
+  <!-- Neon glow orbs - vibrant -->
+  <div class="absolute top-[-200px] left-[-100px] w-[600px] h-[600px] bg-[#00d4ff] rounded-full blur-[200px] opacity-20"></div>
+  <div class="absolute bottom-[-200px] right-[-100px] w-[500px] h-[500px] bg-[#ff0080] rounded-full blur-[180px] opacity-20"></div>
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#8000ff] rounded-full blur-[150px] opacity-15"></div>
+  
+  <!-- Login card -->
+  <div class="w-full max-w-md relative z-10">
+    <div class="relative bg-black/80 backdrop-blur-xl rounded-2xl border border-[#00d4ff]/30 p-8
+                shadow-[0_0_50px_rgba(0,212,255,0.15),inset_0_1px_0_rgba(255,255,255,0.05)]">
+      
+      <!-- Neon top border -->
+      <div class="absolute top-0 left-8 right-8 h-[2px] bg-gradient-to-r from-transparent via-[#00d4ff] to-transparent"></div>
+      
       <div class="flex flex-col items-center mb-8">
-        <div class="p-3 bg-brand-100 rounded-full mb-4">
-          <Printer class="h-10 w-10 text-brand-600" />
+        <!-- Logo with intense glow -->
+        <div class="relative p-5 rounded-2xl mb-4 bg-black border border-[#00d4ff]/50 glow-electric">
+          <Printer class="relative h-12 w-12 text-[#00d4ff]" />
         </div>
-        <h1 class="text-2xl font-bold text-gray-900">gprint</h1>
-        <p class="text-gray-600">Sistema de Gerenciamento de Contratos</p>
+        <h1 class="text-4xl font-black text-[#00d4ff] text-glow-electric tracking-wider">
+          GPRINT
+        </h1>
+        <p class="text-[#787878] mt-2 tracking-wide text-sm">Sistema de Gerenciamento de Contratos</p>
       </div>
 
-      <form onsubmit={handleSubmit} class="space-y-4">
+      <form onsubmit={handleSubmit} class="space-y-5">
         <Input
           label="Usuário"
           type="text"
@@ -87,10 +109,17 @@
           autocomplete="current-password"
         />
 
-        <Button type="submit" class="w-full" loading={submitting}>
-          {#snippet children()}Entrar{/snippet}
+        <Button type="submit" class="w-full mt-6" loading={submitting}>
+          {#snippet children()}ENTRAR{/snippet}
         </Button>
       </form>
+      
+      <div class="mt-8 pt-6 border-t border-[#2a2a2a] text-center">
+        <p class="text-xs text-[#5a5a5a] tracking-wider">
+          v1.0 • 
+          <span class="text-[#00d4ff]/60">POWERED BY GPRINT</span>
+        </p>
+      </div>
     </div>
-  </Card>
+  </div>
 </div>

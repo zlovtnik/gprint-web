@@ -50,7 +50,7 @@
   $effect(() => {
     const service = services.find((s) => String(s.id) === itemForm.serviceId);
     if (service && !editingItem) {
-      itemForm.unitPrice = parseFloat(service.unitPrice) || 0;
+      itemForm.unitPrice = service.unitPrice ?? 0;
     }
   });
 

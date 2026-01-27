@@ -34,31 +34,34 @@
   const goToLast = () => onPageChange(totalPages);
 </script>
 
-<div class="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200">
+<div class="flex items-center justify-between px-4 py-3 
+            bg-[#050505] border-t border-[#1a1a1a] rounded-b-xl">
   <div class="flex items-center gap-4">
     {#if onPageSizeChange}
       <div class="flex items-center gap-2">
-        <label for="page-size" class="text-sm text-gray-600">Mostrar</label>
+        <label for="page-size" class="text-sm text-[#8a8a8a] uppercase tracking-wider">Mostrar</label>
         <select
           id="page-size"
-          class="px-2 py-1 border border-gray-300 rounded text-sm"
+          class="px-2.5 py-1.5 bg-[#0d0d0d] border border-[#2a2a2a] rounded-lg text-sm text-[#c4c4c4] 
+                 focus:outline-none focus:ring-1 focus:ring-[#00d4ff]/50 focus:border-[#00d4ff]/50
+                 transition-all"
           value={pageSize}
           onchange={(e) => onPageSizeChange?.(Number((e.target as HTMLSelectElement).value))}
         >
           {#each pageSizeOptions as size}
-            <option value={size}>{size}</option>
+            <option value={size} class="bg-[#0d0d0d]">{size}</option>
           {/each}
         </select>
       </div>
     {/if}
 
-    <p class="text-sm text-gray-600">
+    <p class="text-sm text-[#5a5a5a]">
       {#if totalCount > 0}
-        <span class="font-medium">{startItem}</span>
+        <span class="font-medium text-[#a0a0a0]">{startItem}</span>
         –
-        <span class="font-medium">{endItem}</span>
+        <span class="font-medium text-[#a0a0a0]">{endItem}</span>
         de
-        <span class="font-medium">{totalCount}</span>
+        <span class="font-bold text-[#00d4ff]">{totalCount}</span>
       {:else}
         0 registros
       {/if}
@@ -75,8 +78,8 @@
       {#snippet children()}{/snippet}
     </Button>
 
-    <span class="px-3 py-1 text-sm text-gray-600">
-      Página {page} de {totalPages || 1}
+    <span class="px-3 py-1.5 text-sm text-void-400 bg-void-800/40 rounded-lg border border-void-700/30">
+      Página <span class="text-void-200 font-medium">{page}</span> de <span class="text-void-200 font-medium">{totalPages || 1}</span>
     </span>
 
     <Button variant="ghost" size="sm" disabled={!canGoNext} onclick={goToNext}>

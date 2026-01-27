@@ -11,11 +11,13 @@
   let { title = 'Nenhum resultado', message, action }: Props = $props();
 </script>
 
-<div class="flex flex-col items-center justify-center p-8 text-center">
-  <FileQuestion class="h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" aria-hidden="true" />
-  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">{title}</h3>
+<div class="flex flex-col items-center justify-center p-12 text-center">
+  <div class="p-4 rounded-2xl bg-[#0d0d0d] border border-[#2a2a2a] mb-5">
+    <FileQuestion class="h-10 w-10 text-[#5a5a5a]" aria-hidden="true" />
+  </div>
+  <h3 class="text-lg font-bold text-[#c4c4c4] mb-2 uppercase tracking-wide">{title}</h3>
   {#if message}
-    <p class="text-gray-600 dark:text-gray-300 mb-4 max-w-md">{message}</p>
+    <p class="text-[#5a5a5a] mb-5 max-w-md text-sm leading-relaxed">{message}</p>
   {/if}
   {#if action}
     {@render action()}

@@ -1,8 +1,7 @@
 // Service validation schemas
 import { z } from 'zod';
 
-export const serviceTypeSchema = z.enum(['PRINT', 'SCAN', 'COPY', 'FAX', 'OTHER']);
-export const unitTypeSchema = z.enum(['UNIT', 'PAGE', 'HOUR', 'PROJECT', 'MONTHLY']);
+export const priceUnitSchema = z.enum(['UNIT', 'PAGE', 'HOUR', 'PROJECT', 'MONTHLY']);
 
 export const createServiceSchema = z.object({
   serviceCode: z
@@ -14,8 +13,7 @@ export const createServiceSchema = z.object({
     .min(2, 'Nome deve ter pelo menos 2 caracteres')
     .max(200, 'Nome deve ter no máximo 200 caracteres'),
   description: z.string().max(1000).optional(),
-  serviceType: serviceTypeSchema,
-  unitType: unitTypeSchema,
+  priceUnit: priceUnitSchema,
   unitPrice: z
     .string()
     .min(1, 'Preço é obrigatório')

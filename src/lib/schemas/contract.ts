@@ -13,11 +13,15 @@ export const contractStatusSchema = z.enum([
 export const billingCycleSchema = z.enum(['MONTHLY', 'QUARTERLY', 'YEARLY', 'ONCE']);
 
 export const createContractSchema = z.object({
+  contractNumber: z.string().min(1, 'Número do contrato é obrigatório'),
   customerId: z.number().min(1, 'Cliente é obrigatório'),
   contractType: contractTypeSchema,
   startDate: z.string().min(1, 'Data de início é obrigatória'),
   endDate: z.string().optional(),
-  durationMonths: z.number().min(1).optional(),
+  durationMonths: z.union([
+    z.string().transform((val) => val === '' ? undefined : parseInt(val, 10)),
+    z.number()
+  ]).optional().refine((val) => val === undefined || val >= 1, { message: 'Duração deve ser pelo menos 1 mês' }),
   autoRenew: z.boolean().optional().default(false),
   paymentTerms: z.string().max(500).optional(),
   billingCycle: billingCycleSchema,
@@ -54,6 +58,7 @@ export const addContractItemSchema = z.object({
   description: z.string().max(500).optional()
 });
 
-export type CreateContractInput = z.infer<typeof createContractSchema>;
-export type UpdateContractInput = z.infer<typeof updateContractSchema>;
+export type CreateContractInput = z.input<typeof createContractSchema>;
+export type CreateContractOutput = z.output<typeof createContractSchema>;
+export type UpdateContractInput = z.input<typeof updateContractSchema>;
 export type AddContractItemInput = z.infer<typeof addContractItemSchema>;

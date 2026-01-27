@@ -43,13 +43,23 @@
 
   const today = formatDateISO(new Date());
 
+  // Generate contract number suggestion
+  const generateContractNumber = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `CTR-${year}${month}-${random}`;
+  };
+
   // Form state
   let form = $state<CreateContractInput>({
+    contractNumber: contract?.contractNumber ?? generateContractNumber(),
     customerId: contract?.customerId ?? customerId ?? 0,
     contractType: contract?.contractType ?? 'SERVICE',
     startDate: contract?.startDate?.split('T')[0] ?? today,
     endDate: contract?.endDate?.split('T')[0] ?? '',
-    durationMonths: contract?.durationMonths ?? undefined,
+    durationMonths: contract?.durationMonths ?? '',
     autoRenew: contract?.autoRenew ?? false,
     paymentTerms: contract?.paymentTerms ?? '',
     billingCycle: contract?.billingCycle ?? 'MONTHLY',
@@ -98,12 +108,36 @@
       return;
     }
 
-    await onSubmit(validation.data as CreateContractRequest | UpdateContractRequest);
+    // Clean up empty optional fields - backend doesn't accept empty strings
+    const data = { ...validation.data };
+    if (data.endDate === '') delete data.endDate;
+    if (data.paymentTerms === '') delete data.paymentTerms;
+    if (data.notes === '') delete data.notes;
+    if (data.durationMonths === undefined) delete data.durationMonths;
+
+    // Convert dates to RFC3339 format for backend (Go time.Time)
+    if (data.startDate && !data.startDate.includes('T')) {
+      data.startDate = `${data.startDate}T00:00:00Z`;
+    }
+    if (data.endDate && !data.endDate.includes('T')) {
+      data.endDate = `${data.endDate}T00:00:00Z`;
+    }
+
+    await onSubmit(data as CreateContractRequest | UpdateContractRequest);
   };
 </script>
 
 <form onsubmit={handleSubmit} class="space-y-6">
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <Input
+      label="Número do Contrato"
+      bind:value={form.contractNumber}
+      error={errors.contractNumber}
+      required
+      disabled={isEditing}
+      placeholder="CTR-202601-001"
+    />
+
     <Select
       label="Cliente"
       bind:value={selectedCustomerId}

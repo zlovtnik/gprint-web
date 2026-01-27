@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Service, ServiceType, UnitType } from '$lib/types/service';
+  import type { Service, PriceUnit } from '$lib/types/service';
   import { Badge, Button } from '$lib/components/ui';
   import { formatCurrency } from '$lib/utils/format';
   import { Edit, Trash2, FileBox } from 'lucide-svelte';
@@ -13,15 +13,7 @@
 
   let { service, onEdit, onDelete, onClick }: Props = $props();
 
-  const typeLabels: Record<ServiceType, string> = {
-    PRINT: 'Impressão',
-    SCAN: 'Digitalização',
-    COPY: 'Cópia',
-    FAX: 'Fax',
-    OTHER: 'Outro'
-  };
-
-  const unitLabels: Record<UnitType, string> = {
+  const unitLabels: Record<PriceUnit, string> = {
     UNIT: 'Unidade',
     PAGE: 'Página',
     HOUR: 'Hora',
@@ -31,7 +23,9 @@
 </script>
 
 <article
-  class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow
+  class="bg-[#0a0a0a] rounded-xl border border-[#8000ff]/20 p-4 
+         hover:border-[#8000ff]/40 hover:shadow-[0_0_20px_rgba(128,0,255,0.15)] 
+         transition-all duration-200
          {onClick ? 'cursor-pointer' : ''}"
   onclick={() => onClick?.(service)}
   onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick?.(service)}
@@ -40,12 +34,12 @@
 >
   <header class="flex items-start justify-between mb-3">
     <div class="flex items-center gap-3">
-      <div class="p-2 rounded-lg bg-purple-100">
-        <FileBox class="h-5 w-5 text-purple-600" />
+      <div class="p-2 rounded-lg bg-[#8000ff]/10 border border-[#8000ff]/30">
+        <FileBox class="h-5 w-5 text-[#8000ff]" />
       </div>
       <div>
-        <h3 class="font-semibold text-gray-900">{service.name}</h3>
-        <p class="text-sm text-gray-500">{service.serviceCode}</p>
+        <h3 class="font-bold text-[#e8e8e8]">{service.name}</h3>
+        <p class="text-sm text-[#5a5a5a]">{service.serviceCode}</p>
       </div>
     </div>
     <Badge color={service.active ? 'green' : 'gray'}>
@@ -53,27 +47,23 @@
     </Badge>
   </header>
 
-  <div class="space-y-2 text-sm text-gray-600 mb-4">
+  <div class="space-y-2 text-sm text-[#787878] mb-4">
     <div class="flex items-center gap-4">
-      <Badge color="purple" size="sm">
-        {#snippet children()}{typeLabels[service.serviceType]}{/snippet}
-      </Badge>
-      <span class="text-gray-400">•</span>
-      <span>Unidade: {unitLabels[service.unitType]}</span>
+      <span>Unidade: {unitLabels[service.priceUnit] ?? service.priceUnit ?? 'N/A'}</span>
     </div>
 
-    <p class="text-lg font-semibold text-gray-900">
-      {formatCurrency('BRL')(service.unitPrice)}
-      <span class="text-sm font-normal text-gray-500">/ {unitLabels[service.unitType].toLowerCase()}</span>
+    <p class="text-lg font-bold text-[#00d4ff]">
+      {formatCurrency('BRL')(service.unitPrice ?? 0)}
+      <span class="text-sm font-normal text-[#5a5a5a]">/ {unitLabels[service.priceUnit]?.toLowerCase() ?? 'unidade'}</span>
     </p>
 
     {#if service.description}
-      <p class="text-gray-600 line-clamp-2">{service.description}</p>
+      <p class="text-[#787878] line-clamp-2">{service.description}</p>
     {/if}
   </div>
 
   {#if onEdit || onDelete}
-    <footer class="flex items-center gap-2 pt-3 border-t">
+    <footer class="flex items-center gap-2 pt-3 border-t border-[#1a1a1a]">
       {#if onEdit}
         <Button
           variant="ghost"
