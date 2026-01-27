@@ -25,13 +25,15 @@ const parseToken = (token: string): User | null => {
     if (parts.length < 2) return null;
     const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
     const payload = JSON.parse(atob(base64));
+    console.log('JWT payload:', payload); // Debug: see what the token contains
     return {
-      id: payload.user ?? payload.sub,
-      username: payload.username,
-      tenantId: payload.tenant_id,
-      role: payload.role
+      id: payload.user ?? payload.user_id ?? payload.userId ?? payload.sub ?? '',
+      username: payload.username ?? payload.name ?? '',
+      tenantId: payload.tenant_id ?? payload.tenantId ?? '',
+      role: payload.role ?? ''
     };
-  } catch {
+  } catch (e) {
+    console.error('JWT parse error:', e);
     return null;
   }
 };
