@@ -1,9 +1,16 @@
 services:
   - type: web
     name: gprint-web
-    env: static
-    staticPublishPath: ./build
+    runtime: static
     buildCommand: bun install && bun run build
+    staticPublishPath: ./build
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /index.html
+        name: Cache-Control
+        value: no-cache
     routes:
       - type: rewrite
         source: /*
