@@ -1,14 +1,60 @@
 <script lang="ts">
   import { Users, FileText, Briefcase, Printer, TrendingUp, Clock } from 'lucide-svelte';
-  import Card from '$lib/components/ui/Card.svelte';
+  import { onMount } from 'svelte';
+  import { customersApi } from '$lib/api/customers';
+  import { contractsApi } from '$lib/api/contracts';
+  import { servicesApi } from '$lib/api/services';
+  import { printJobsApi } from '$lib/api/print-jobs';
+  import type { Contract } from '$lib/types/contract';
+  import { formatDate } from '$lib/utils/format';
+  import Spinner from '$lib/components/ui/Spinner.svelte';
 
-  // Dashboard stats would come from API
-  const stats = [
-    { label: 'Clientes Ativos', value: '—', icon: Users, color: '#00d4ff', glow: 'rgba(0,212,255,0.3)' },
-    { label: 'Contratos Ativos', value: '—', icon: FileText, color: '#39ff14', glow: 'rgba(57,255,20,0.3)' },
-    { label: 'Serviços Cadastrados', value: '—', icon: Briefcase, color: '#8000ff', glow: 'rgba(128,0,255,0.3)' },
-    { label: 'Impressões Hoje', value: '—', icon: Printer, color: '#ff0080', glow: 'rgba(255,0,128,0.3)' }
-  ];
+  // Dashboard state
+  let loading = $state(true);
+  let customersCount = $state(0);
+  let contractsCount = $state(0);
+  let servicesCount = $state(0);
+  let printJobsToday = $state(0);
+  let recentContracts = $state<Contract[]>([]);
+
+  // Fetch dashboard data
+  onMount(async () => {
+    loading = true;
+    
+    const [customersRes, contractsRes, servicesRes, printJobsRes] = await Promise.all([
+      customersApi.list({ page: 1, pageSize: 1, active: true }),
+      contractsApi.list({ page: 1, pageSize: 5, status: 'ACTIVE' }),
+      servicesApi.list({ page: 1, pageSize: 1, active: true }),
+      printJobsApi.list({ page: 1, pageSize: 1 })
+    ]);
+
+    if (customersRes.ok) {
+      customersCount = customersRes.value.total ?? 0;
+    }
+    
+    if (contractsRes.ok) {
+      contractsCount = contractsRes.value.total ?? 0;
+      recentContracts = contractsRes.value.items ?? [];
+    }
+    
+    if (servicesRes.ok) {
+      servicesCount = servicesRes.value.total ?? 0;
+    }
+    
+    if (printJobsRes.ok) {
+      printJobsToday = printJobsRes.value.total ?? 0;
+    }
+
+    loading = false;
+  });
+
+  // Stats computed from state
+  const stats = $derived([
+    { label: 'Clientes Ativos', value: customersCount, icon: Users, color: '#00d4ff', glow: 'rgba(0,212,255,0.3)' },
+    { label: 'Contratos Ativos', value: contractsCount, icon: FileText, color: '#39ff14', glow: 'rgba(57,255,20,0.3)' },
+    { label: 'Serviços Cadastrados', value: servicesCount, icon: Briefcase, color: '#8000ff', glow: 'rgba(128,0,255,0.3)' },
+    { label: 'Impressões', value: printJobsToday, icon: Printer, color: '#ff0080', glow: 'rgba(255,0,128,0.3)' }
+  ]);
 </script>
 
 <svelte:head>
@@ -38,7 +84,11 @@
           </div>
           <div>
             <p class="text-sm text-[#787878] uppercase tracking-wider">{stat.label}</p>
-            <p class="text-3xl font-black text-[#e8e8e8]">{stat.value}</p>
+            {#if loading}
+              <Spinner size="sm" />
+            {:else}
+              <p class="text-3xl font-black text-[#e8e8e8]">{stat.value}</p>
+            {/if}
           </div>
         </div>
       </div>
@@ -56,7 +106,28 @@
         </h2>
       </div>
       <div class="p-4">
-        <p class="text-[#5a5a5a] text-center py-8">Nenhum contrato recente</p>
+        {#if loading}
+          <div class="flex justify-center py-8">
+            <Spinner />
+          </div>
+        {:else if recentContracts.length === 0}
+          <p class="text-[#5a5a5a] text-center py-8">Nenhum contrato recente</p>
+        {:else}
+          <div class="space-y-3">
+            {#each recentContracts as contract}
+              <a href="/contracts/{contract.id}" 
+                 class="block p-3 rounded-lg bg-[#050505] border border-[#1a1a1a] hover:border-[#00d4ff]/40 transition-colors">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <p class="text-[#e8e8e8] font-medium">{contract.contractNumber}</p>
+                    <p class="text-sm text-[#787878]">{contract.customerName ?? 'Cliente'}</p>
+                  </div>
+                  <span class="text-xs text-[#5a5a5a]">{formatDate(contract.startDate)}</span>
+                </div>
+              </a>
+            {/each}
+          </div>
+        {/if}
       </div>
     </div>
 
