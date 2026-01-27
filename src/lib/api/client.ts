@@ -3,7 +3,7 @@ import ky, { type KyInstance, HTTPError } from 'ky';
 import { Ok, Err, type Result } from '$lib/utils/result';
 import type { ApiError, ApiResponse, PaginatedResponse } from '$lib/types/api';
 
-const API_BASE ='http://localhost:8081';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8081';
 
 let authToken: string | null = null;
 
