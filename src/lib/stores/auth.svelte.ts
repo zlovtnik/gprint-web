@@ -127,9 +127,9 @@ const createAuthStore = () => {
       const result = await authApi.login({ username, password });
 
       if (result.ok) {
-        const parsedUser = parseToken(result.value.access_token);
+        const parsedUser = parseToken(result.value.accessToken);
         if (parsedUser) {
-          state.token = result.value.access_token;
+          state.token = result.value.accessToken;
           state.user = parsedUser;
           syncToken(state.token);
           // Reset the logout guard so 401s can be handled again
