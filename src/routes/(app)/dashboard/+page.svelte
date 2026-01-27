@@ -29,20 +29,20 @@
     ]);
 
     if (customersRes.ok) {
-      customersCount = customersRes.value.total ?? 0;
+      customersCount = customersRes.value.totalCount ?? 0;
     }
     
     if (contractsRes.ok) {
-      contractsCount = contractsRes.value.total ?? 0;
-      recentContracts = contractsRes.value.items ?? [];
+      contractsCount = contractsRes.value.totalCount ?? 0;
+      recentContracts = contractsRes.value.data ?? [];
     }
     
     if (servicesRes.ok) {
-      servicesCount = servicesRes.value.total ?? 0;
+      servicesCount = servicesRes.value.totalCount ?? 0;
     }
     
     if (printJobsRes.ok) {
-      printJobsToday = printJobsRes.value.total ?? 0;
+      printJobsToday = printJobsRes.value.totalCount ?? 0;
     }
 
     loading = false;
@@ -85,7 +85,7 @@
           <div>
             <p class="text-sm text-[#787878] uppercase tracking-wider">{stat.label}</p>
             {#if loading}
-              <Spinner size="sm" />
+              <Spinner class="!p-0" />
             {:else}
               <p class="text-3xl font-black text-[#e8e8e8]">{stat.value}</p>
             {/if}
@@ -120,7 +120,7 @@
                 <div class="flex justify-between items-start">
                   <div>
                     <p class="text-[#e8e8e8] font-medium">{contract.contractNumber}</p>
-                    <p class="text-sm text-[#787878]">{contract.customerName ?? 'Cliente'}</p>
+                    <p class="text-sm text-[#787878]">{contract.customer?.name ?? 'Cliente'}</p>
                   </div>
                   <span class="text-xs text-[#5a5a5a]">{formatDate(contract.startDate)}</span>
                 </div>
