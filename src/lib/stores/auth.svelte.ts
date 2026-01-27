@@ -23,7 +23,7 @@ const parseToken = (token: string): User | null => {
   try {
     const parts = token.split('.');
     if (parts.length < 2) return null;
-    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const base64 = parts[1].replaceAll('-', '+').replaceAll('_', '/');
     const payload = JSON.parse(atob(base64));
     console.log('JWT payload:', payload); // Debug: see what the token contains
     return {
@@ -43,7 +43,7 @@ const isTokenExpired = (token: string): boolean => {
   try {
     const parts = token.split('.');
     if (parts.length < 2) return true;
-    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const base64 = parts[1].replaceAll('-', '+').replaceAll('_', '/');
     const payload = JSON.parse(atob(base64));
     if (!payload.exp) return true;
     return Date.now() >= payload.exp * 1000;
@@ -55,7 +55,7 @@ const isTokenExpired = (token: string): boolean => {
 // Safe localStorage access for SSR compatibility
 const safeLocalStorage = {
   getItem: (key: string) => {
-    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+    if (typeof globalThis.window === 'undefined' || typeof localStorage === 'undefined') {
       return null;
     }
     try {
@@ -65,7 +65,7 @@ const safeLocalStorage = {
     }
   },
   setItem: (key: string, value: string) => {
-    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+    if (typeof globalThis.window === 'undefined' || typeof localStorage === 'undefined') {
       return;
     }
     try {
@@ -75,7 +75,7 @@ const safeLocalStorage = {
     }
   },
   removeItem: (key: string) => {
-    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+    if (typeof globalThis.window === 'undefined' || typeof localStorage === 'undefined') {
       return;
     }
     try {
