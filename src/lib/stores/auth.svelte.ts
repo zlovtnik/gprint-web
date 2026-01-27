@@ -55,7 +55,7 @@ const isTokenExpired = (token: string): boolean => {
 // Safe localStorage access for SSR compatibility
 const safeLocalStorage = {
   getItem: (key: string) => {
-    if (typeof globalThis.window === 'undefined' || typeof localStorage === 'undefined') {
+    if (globalThis.window === undefined || typeof localStorage === 'undefined') {
       return null;
     }
     try {
@@ -65,7 +65,7 @@ const safeLocalStorage = {
     }
   },
   setItem: (key: string, value: string) => {
-    if (typeof globalThis.window === 'undefined' || typeof localStorage === 'undefined') {
+    if (globalThis.window === undefined || typeof localStorage === 'undefined') {
       return;
     }
     try {
@@ -75,7 +75,7 @@ const safeLocalStorage = {
     }
   },
   removeItem: (key: string) => {
-    if (typeof globalThis.window === 'undefined' || typeof localStorage === 'undefined') {
+    if (globalThis.window === undefined || typeof localStorage === 'undefined') {
       return;
     }
     try {
