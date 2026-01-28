@@ -12,7 +12,8 @@
     LogOut,
     Menu,
     X,
-    ChevronDown
+    ChevronDown,
+    Plug
   } from 'lucide-svelte';
   import Button from '$lib/components/ui/Button.svelte';
 
@@ -43,7 +44,8 @@
     { name: 'Clientes', href: '/customers', icon: Users },
     { name: 'Serviços', href: '/services', icon: Briefcase },
     { name: 'Contratos', href: '/contracts', icon: FileText },
-    { name: 'Fila de Impressão', href: '/print-jobs', icon: Printer }
+    { name: 'Fila de Impressão', href: '/print-jobs', icon: Printer },
+    { name: 'Integrações', href: '/integrations', icon: Plug }
   ];
 
   const isActive = (href: string) => {

@@ -6,3 +6,4 @@ export * from './service';
 export * from './contract';
 export * from './generation';
 export * from './print-job';
+export * from './integration';
