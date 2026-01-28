@@ -13,10 +13,28 @@
     Layers
   } from 'lucide-svelte';
 
+  let localLoading = $state(true);
+  let localError = $state<string | null>(null);
+
+  async function loadAllMessagesData() {
+    localLoading = true;
+    localError = null;
+    try {
+      await Promise.all([
+        messagesStore.loadChannels(),
+        messagesStore.loadAggregations(),
+        messagesStore.loadDeadLetterMessages({ limit: 5 })
+      ]);
+    } catch (e) {
+      localError = e instanceof Error ? e.message : 'Failed to load messages data';
+      console.error('Failed to load messages data:', e);
+    } finally {
+      localLoading = false;
+    }
+  }
+
   $effect(() => {
-    messagesStore.loadChannels();
-    messagesStore.loadAggregations();
-    messagesStore.loadDeadLetterMessages({ limit: 5 });
+    loadAllMessagesData();
   });
 </script>
 
@@ -36,19 +54,31 @@
         Canais, agregações e monitoramento de mensagens
       </p>
     </div>
-    <Button variant="ghost" onclick={() => { 
-      messagesStore.loadChannels(); 
-      messagesStore.loadAggregations(); 
-      messagesStore.loadDeadLetterMessages({ limit: 5 }); 
-    }} disabled={messagesStore.loading}>
-      <RefreshCw class="h-4 w-4 {messagesStore.loading ? 'animate-spin' : ''}" />
+    <Button variant="ghost" onclick={() => loadAllMessagesData()} disabled={localLoading}>
+      <RefreshCw class="h-4 w-4 {localLoading ? 'animate-spin' : ''}" />
     </Button>
   </div>
 
-  {#if messagesStore.loading}
+  {#if localLoading}
     <div class="flex justify-center py-12">
       <Spinner size="lg" />
     </div>
+  {:else if localError}
+    <Card class="!bg-[#0a0a0a] border-[#ff0080]/30">
+      <div class="flex items-center gap-4 p-4">
+        <div class="p-3 rounded-lg bg-[#ff0080]/10">
+          <AlertTriangle class="h-6 w-6 text-[#ff0080]" />
+        </div>
+        <div class="flex-1">
+          <p class="text-[#ff0080] font-medium">Erro ao carregar dados</p>
+          <p class="text-sm text-[#787878] mt-1">{localError}</p>
+        </div>
+        <Button variant="ghost" onclick={() => loadAllMessagesData()}>
+          <RefreshCw class="h-4 w-4 mr-2" />
+          Tentar novamente
+        </Button>
+      </div>
+    </Card>
   {:else}
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">

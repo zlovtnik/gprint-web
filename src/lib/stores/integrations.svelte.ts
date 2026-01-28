@@ -168,6 +168,7 @@ class RoutesStore {
 
   async loadRoute(id: string) {
     this.loading = true;
+    this.error = null;
     try {
       const result = await routesApi.getRoute(id);
       if (result.ok) {
@@ -291,6 +292,7 @@ class MessagesStore {
 
   async loadChannel(name: string) {
     this.loading = true;
+    this.error = null;
     try {
       const result = await messagesApi.getChannel(name);
       if (result.ok) {
@@ -305,6 +307,7 @@ class MessagesStore {
 
   async loadAggregations(params?: { status?: 'pending' | 'complete' | 'timeout'; limit?: number }) {
     this.loading = true;
+    this.error = null;
     try {
       const result = await messagesApi.listAggregations(params);
       if (result.ok) {
@@ -319,6 +322,7 @@ class MessagesStore {
 
   async loadDeadLetterMessages(params?: { limit?: number }) {
     this.loading = true;
+    this.error = null;
     try {
       const result = await messagesApi.listDeadLetterMessages(params);
       if (result.ok) {

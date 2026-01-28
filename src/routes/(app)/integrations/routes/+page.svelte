@@ -36,9 +36,19 @@
     { value: 'function', label: 'Função' }
   ];
 
+  let localLoading = $state(false);
+
+  async function loadAllRoutesData() {
+    localLoading = true;
+    try {
+      await Promise.all([routesStore.loadRoutes(), routesStore.loadStats()]);
+    } finally {
+      localLoading = false;
+    }
+  }
+
   $effect(() => {
-    routesStore.loadRoutes();
-    routesStore.loadStats();
+    loadAllRoutesData();
   });
 
   async function handleCreateRoute() {
@@ -65,8 +75,17 @@
 
   async function handleDeleteRoute(id: string) {
     deletingId = id;
-    await routesStore.deleteRoute(id);
-    deletingId = null;
+    try {
+      const success = await routesStore.deleteRoute(id);
+      if (!success && routesStore.error) {
+        console.error('Failed to delete route:', routesStore.error);
+        // Error is already set in routesStore.error for UI display
+      }
+    } catch (e) {
+      console.error('Failed to delete route:', e);
+    } finally {
+      deletingId = null;
+    }
   }
 </script>
 
@@ -87,8 +106,8 @@
       </p>
     </div>
     <div class="flex items-center gap-3">
-      <Button variant="ghost" onclick={() => routesStore.loadRoutes()} disabled={routesStore.loading}>
-        <RefreshCw class="h-4 w-4 {routesStore.loading ? 'animate-spin' : ''}" />
+      <Button variant="ghost" onclick={() => loadAllRoutesData()} disabled={localLoading}>
+        <RefreshCw class="h-4 w-4 {localLoading ? 'animate-spin' : ''}" />
       </Button>
       <Button variant="primary" onclick={() => (showCreateModal = true)}>
         <Plus class="h-4 w-4 mr-2" />

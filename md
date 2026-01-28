@@ -1,4 +1,4 @@
-# GprintEx Integration Dashboard - Frontend Development Specification
+# Pressly Integration Dashboard - Frontend Development Specification
 
 > **Stack**: Svelte 5 + SvelteKit + TypeScript + Bun  
 > **Purpose**: Integration management dashboard for CLM ETL pipelines, message routing, and monitoring
@@ -8,7 +8,7 @@
 ## 1. Overview
 
 ### 1.1 Project Goals
-Build a reactive, type-safe dashboard for managing and monitoring the GprintEx integration layer:
+Build a reactive, type-safe dashboard for managing and monitoring the Pressly integration layer:
 - ETL pipeline management (sessions, staging, validation, promotion)
 - Message routing configuration (dynamic routes, recipient lists)
 - Real-time integration monitoring (message channels, aggregations)
@@ -30,7 +30,7 @@ Build a reactive, type-safe dashboard for managing and monitoring the GprintEx i
                               │
                               ▼ HTTP/WebSocket
 ┌─────────────────────────────────────────────────────────────┐
-│              GprintEx Elixir Backend (port 4000)            │
+│              Pressly Elixir Backend (port 4000)             │
 │  /api/etl/*  /api/routes/*  /api/messages/*  /api/ws        │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -49,7 +49,7 @@ Build a reactive, type-safe dashboard for managing and monitoring the GprintEx i
 | Icons | Lucide Svelte | latest | Icon library |
 | Charts | Chart.js + svelte-chartjs | latest | Metrics visualization |
 | Tables | TanStack Table | 8.x | Data tables with sorting/filtering |
-| Forms | Superforms + Zod | latest | Form validation |
+| Forms | Superforms + Zod | 4.x | Form validation |
 | State | Svelte 5 Runes | native | $state, $derived, $effect |
 | HTTP | Native fetch | native | API calls |
 | WebSocket | Native WebSocket | native | Real-time updates |
@@ -677,7 +677,7 @@ The frontend expects these endpoints from the Elixir backend:
 
 ```bash
 # Create SvelteKit project with Bun
-cd /Users/rcs/git/fire/integ
+cd $PROJECT_DIR
 mkdir frontend && cd frontend
 
 bun create svelte@latest . --template skeleton --types typescript
@@ -719,8 +719,8 @@ bun test
 VITE_API_URL=http://localhost:4000/api
 VITE_WS_URL=ws://localhost:4000/api/ws
 VITE_KEYCLOAK_URL=http://localhost:8080
-VITE_KEYCLOAK_REALM=gprint
-VITE_KEYCLOAK_CLIENT_ID=gprint-frontend
+VITE_KEYCLOAK_REALM=pressly
+VITE_KEYCLOAK_CLIENT_ID=pressly-frontend
 ```
 
 ---

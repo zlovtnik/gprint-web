@@ -22,14 +22,20 @@
 
   async function handleRetry(id: number) {
     retryingId = id;
-    await messagesStore.retryDeadLetter(id);
-    retryingId = null;
+    try {
+      await messagesStore.retryDeadLetter(id);
+    } finally {
+      retryingId = null;
+    }
   }
 
   async function handleDelete(id: number) {
     deletingId = id;
-    await messagesStore.deleteDeadLetter(id);
-    deletingId = null;
+    try {
+      await messagesStore.deleteDeadLetter(id);
+    } finally {
+      deletingId = null;
+    }
   }
 
   function formatDate(dateStr: string) {

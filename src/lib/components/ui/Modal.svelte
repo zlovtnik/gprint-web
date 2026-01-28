@@ -6,12 +6,20 @@
     open: boolean;
     title?: string;
     size?: 'sm' | 'md' | 'lg' | 'xl';
-    onClose: () => void;
+    onClose?: () => void;
     children: Snippet;
     footer?: Snippet;
   }
 
   let { open = $bindable(), title, size = 'md', onClose, children, footer }: Props = $props();
+
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      open = false;
+    }
+  };
 
   const sizes: Record<'sm' | 'md' | 'lg' | 'xl', string> = {
     sm: 'max-w-sm',
@@ -22,13 +30,13 @@
 
   const handleKeydown = (e: KeyboardEvent) => {
     if (open && e.key === 'Escape') {
-      onClose();
+      handleClose();
     }
   };
 
   const handleBackdropClick = (e: MouseEvent) => {
     if (e.target === e.currentTarget) {
-      onClose();
+      handleClose();
     }
   };
 </script>
@@ -62,7 +70,7 @@
             class="p-1.5 text-[#5a5a5a] hover:text-[#ff0080] 
                    rounded-lg hover:bg-[#1a1a1a] 
                    transition-all duration-200"
-            onclick={onClose}
+            onclick={handleClose}
             aria-label="Close"
           >
             <X class="h-5 w-5" />

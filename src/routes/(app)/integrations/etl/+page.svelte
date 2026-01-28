@@ -42,13 +42,18 @@
     if (!newSession.tenantId || !newSession.sourceSystem) return;
     
     creating = true;
-    const sessionId = await etlStore.createSession(newSession.tenantId, newSession.sourceSystem);
-    creating = false;
-    
-    if (sessionId) {
-      showCreateModal = false;
-      newSession = { tenantId: '', sourceSystem: '' };
-      goto(`/integrations/etl/sessions/${sessionId}`);
+    try {
+      const sessionId = await etlStore.createSession(newSession.tenantId, newSession.sourceSystem);
+      
+      if (sessionId) {
+        showCreateModal = false;
+        newSession = { tenantId: '', sourceSystem: '' };
+        goto(`/integrations/etl/sessions/${sessionId}`);
+      }
+    } catch (e) {
+      console.error('Failed to create session:', e);
+    } finally {
+      creating = false;
     }
   }
 
@@ -181,22 +186,22 @@
                   {session.totalRecords}
                 </td>
                 <td class="px-4 py-3">
-                  <div class="flex items-center gap-2">
-                    <div class="flex-1 h-2 bg-[#2a2a2a] rounded-full overflow-hidden">
-                      {@const progress = session.totalRecords > 0 
-                        ? Math.round((session.promotedRecords / session.totalRecords) * 100) 
-                        : 0}
-                      <div 
-                        class="h-full bg-[#00d4ff] transition-all duration-300"
-                        style="width: {progress}%"
-                      ></div>
+                  {#if true}
+                    {@const progress = session.totalRecords > 0 
+                      ? Math.round((session.promotedRecords / session.totalRecords) * 100) 
+                      : 0}
+                    <div class="flex items-center gap-2">
+                      <div class="flex-1 h-2 bg-[#2a2a2a] rounded-full overflow-hidden">
+                        <div 
+                          class="h-full bg-[#00d4ff] transition-all duration-300"
+                          style="width: {progress}%"
+                        ></div>
+                      </div>
+                      <span class="text-xs text-[#5a5a5a] w-12 text-right">
+                        {progress}%
+                      </span>
                     </div>
-                    <span class="text-xs text-[#5a5a5a] w-12 text-right">
-                      {session.totalRecords > 0 
-                        ? Math.round((session.promotedRecords / session.totalRecords) * 100) 
-                        : 0}%
-                    </span>
-                  </div>
+                  {/if}
                 </td>
                 <td class="px-4 py-3">
                   <div class="flex items-center gap-2">

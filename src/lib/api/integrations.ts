@@ -16,6 +16,13 @@ import type {
 // Integration backend base - can be different from main API
 const INTEGRATION_API_BASE = import.meta.env.VITE_INTEGRATION_API_URL || 'http://localhost:4000/api';
 
+// Helper to prefix integration API base URL to endpoint paths
+const prefixIntegrationUrl = (path: string): string => {
+  // Remove leading slash if present to avoid double slashes
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  return `${INTEGRATION_API_BASE}/${cleanPath}`;
+};
+
 // ============================================
 // ETL API
 // ============================================
@@ -34,13 +41,13 @@ export interface CreateSessionData {
 export const etlApi = {
   // Sessions
   listSessions: (params?: ListSessionsParams): Promise<Result<ETLSession[], ApiError>> =>
-    fetchApi<ETLSession[]>(`etl/sessions${buildSearchParams(params ?? {})}`),
+    fetchApi<ETLSession[]>(prefixIntegrationUrl(`etl/sessions${buildSearchParams(params ?? {})}`)),
 
   getSession: (id: string): Promise<Result<ETLSession, ApiError>> =>
-    fetchApi<ETLSession>(`etl/sessions/${id}`),
+    fetchApi<ETLSession>(prefixIntegrationUrl(`etl/sessions/${id}`)),
 
   createSession: (data: CreateSessionData): Promise<Result<{ sessionId: string }, ApiError>> =>
-    fetchApiSnake<{ sessionId: string }>('etl/sessions', {
+    fetchApiSnake<{ sessionId: string }>(prefixIntegrationUrl('etl/sessions'), {
       method: 'POST',
       json: data
     }),
@@ -51,24 +58,24 @@ export const etlApi = {
     params?: { status?: string; page?: number }
   ): Promise<Result<PaginatedResponse<StagingRecord>, ApiError>> =>
     fetchApi<PaginatedResponse<StagingRecord>>(
-      `etl/sessions/${sessionId}/staging${buildSearchParams(params ?? {})}`
+      prefixIntegrationUrl(`etl/sessions/${sessionId}/staging${buildSearchParams(params ?? {})}`)
     ),
 
   // Transformation
   transformSession: (sessionId: string): Promise<Result<void, ApiError>> =>
-    fetchApi<void>(`etl/sessions/${sessionId}/transform`, { method: 'POST' }),
+    fetchApi<void>(prefixIntegrationUrl(`etl/sessions/${sessionId}/transform`), { method: 'POST' }),
 
   // Validation
   validateSession: (sessionId: string): Promise<Result<ValidationResult[], ApiError>> =>
-    fetchApi<ValidationResult[]>(`etl/sessions/${sessionId}/validate`, { method: 'POST' }),
+    fetchApi<ValidationResult[]>(prefixIntegrationUrl(`etl/sessions/${sessionId}/validate`), { method: 'POST' }),
 
   // Promotion
   promoteSession: (sessionId: string): Promise<Result<{ promotedCount: number }, ApiError>> =>
-    fetchApi<{ promotedCount: number }>(`etl/sessions/${sessionId}/promote`, { method: 'POST' }),
+    fetchApi<{ promotedCount: number }>(prefixIntegrationUrl(`etl/sessions/${sessionId}/promote`), { method: 'POST' }),
 
   // Rollback
   rollbackSession: (sessionId: string): Promise<Result<void, ApiError>> =>
-    fetchApi<void>(`etl/sessions/${sessionId}/rollback`, { method: 'POST' }),
+    fetchApi<void>(prefixIntegrationUrl(`etl/sessions/${sessionId}/rollback`), { method: 'POST' }),
 
   // File upload
   uploadFile: async (
@@ -80,7 +87,7 @@ export const etlApi = {
     formData.append('file', file);
     formData.append('config', JSON.stringify(config));
 
-    return fetchApi<{ recordsLoaded: number }>(`etl/sessions/${sessionId}/upload`, {
+    return fetchApi<{ recordsLoaded: number }>(prefixIntegrationUrl(`etl/sessions/${sessionId}/upload`), {
       method: 'POST',
       body: formData,
       headers: {} // Let browser set content-type for FormData
@@ -111,32 +118,32 @@ export interface UpdateRouteData extends Partial<CreateRouteData> {}
 export const routesApi = {
   // Routes
   listRoutes: (params?: ListRoutesParams): Promise<Result<RouteEntry[], ApiError>> =>
-    fetchApi<RouteEntry[]>(`routes${buildSearchParams(params ?? {})}`),
+    fetchApi<RouteEntry[]>(prefixIntegrationUrl(`routes${buildSearchParams(params ?? {})}`)),
 
   getRoute: (id: string): Promise<Result<RouteEntry, ApiError>> =>
-    fetchApi<RouteEntry>(`routes/${id}`),
+    fetchApi<RouteEntry>(prefixIntegrationUrl(`routes/${id}`)),
 
   createRoute: (data: CreateRouteData): Promise<Result<RouteEntry, ApiError>> =>
-    fetchApiSnake<RouteEntry>('routes', {
+    fetchApiSnake<RouteEntry>(prefixIntegrationUrl('routes'), {
       method: 'POST',
       json: data
     }),
 
   updateRoute: (id: string, data: UpdateRouteData): Promise<Result<RouteEntry, ApiError>> =>
-    fetchApiSnake<RouteEntry>(`routes/${id}`, {
+    fetchApiSnake<RouteEntry>(prefixIntegrationUrl(`routes/${id}`), {
       method: 'PUT',
       json: data
     }),
 
   deleteRoute: (id: string): Promise<Result<void, ApiError>> =>
-    fetchApi<void>(`routes/${id}`, { method: 'DELETE' }),
+    fetchApi<void>(prefixIntegrationUrl(`routes/${id}`), { method: 'DELETE' }),
 
   toggleRoute: (id: string): Promise<Result<RouteEntry, ApiError>> =>
-    fetchApi<RouteEntry>(`routes/${id}/toggle`, { method: 'POST' }),
+    fetchApi<RouteEntry>(prefixIntegrationUrl(`routes/${id}/toggle`), { method: 'POST' }),
 
   // Stats
   getRouteStats: (): Promise<Result<RouteStats, ApiError>> =>
-    fetchApi<RouteStats>('routes/stats')
+    fetchApi<RouteStats>(prefixIntegrationUrl('routes/stats'))
 };
 
 // ============================================
@@ -162,24 +169,24 @@ export interface ListDeadLetterParams {
 export const messagesApi = {
   // Channels
   listChannels: (params?: ListChannelsParams): Promise<Result<Channel[], ApiError>> =>
-    fetchApi<Channel[]>(`messages/channels${buildSearchParams(params ?? {})}`),
+    fetchApi<Channel[]>(prefixIntegrationUrl(`messages/channels${buildSearchParams(params ?? {})}`)),
 
   getChannel: (name: string): Promise<Result<Channel, ApiError>> =>
-    fetchApi<Channel>(`messages/channels/${encodeURIComponent(name)}`),
+    fetchApi<Channel>(prefixIntegrationUrl(`messages/channels/${encodeURIComponent(name)}`)),
 
   // Aggregations
   listAggregations: (params?: ListAggregationsParams): Promise<Result<Aggregation[], ApiError>> =>
-    fetchApi<Aggregation[]>(`messages/aggregations${buildSearchParams(params ?? {})}`),
+    fetchApi<Aggregation[]>(prefixIntegrationUrl(`messages/aggregations${buildSearchParams(params ?? {})}`)),
 
   // Dead Letter Queue
   listDeadLetterMessages: (
     params?: ListDeadLetterParams
   ): Promise<Result<DeadLetterMessage[], ApiError>> =>
-    fetchApi<DeadLetterMessage[]>(`messages/dead-letter${buildSearchParams(params ?? {})}`),
+    fetchApi<DeadLetterMessage[]>(prefixIntegrationUrl(`messages/dead-letter${buildSearchParams(params ?? {})}`)),
 
   retryDeadLetterMessage: (id: number): Promise<Result<void, ApiError>> =>
-    fetchApi<void>(`messages/dead-letter/${id}/retry`, { method: 'POST' }),
+    fetchApi<void>(prefixIntegrationUrl(`messages/dead-letter/${id}/retry`), { method: 'POST' }),
 
   deleteDeadLetterMessage: (id: number): Promise<Result<void, ApiError>> =>
-    fetchApi<void>(`messages/dead-letter/${id}`, { method: 'DELETE' })
+    fetchApi<void>(prefixIntegrationUrl(`messages/dead-letter/${id}`), { method: 'DELETE' })
 };
