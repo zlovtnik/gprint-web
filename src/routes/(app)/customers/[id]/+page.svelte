@@ -74,7 +74,7 @@
 </script>
 
 <svelte:head>
-  <title>{customer?.name ?? 'Cliente'} - gprint</title>
+  <title>{customer?.name ?? 'Cliente'} - Pressly</title>
 </svelte:head>
 
 <div class="space-y-6">

@@ -33,7 +33,7 @@
 </script>
 
 <svelte:head>
-  <title>Novo Serviço - gprint</title>
+  <title>Novo Serviço - Pressly</title>
 </svelte:head>
 
 <div class="space-y-6">

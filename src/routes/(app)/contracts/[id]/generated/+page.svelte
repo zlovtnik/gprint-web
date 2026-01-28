@@ -108,7 +108,7 @@
 </script>
 
 <svelte:head>
-  <title>Documentos Gerados - gprint</title>
+  <title>Documentos Gerados - Pressly</title>
 </svelte:head>
 
 <div class="space-y-6">

@@ -3,7 +3,7 @@ import { setAuthToken, setOnUnauthorized, resetLogoutGuard } from '$lib/api/clie
 import { authApi } from '$lib/api/auth';
 import { goto } from '$app/navigation';
 
-const TOKEN_KEY = 'gprint_token';
+const TOKEN_KEY = 'pressly_token';
 
 interface User {
   id: string;

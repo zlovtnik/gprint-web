@@ -28,7 +28,7 @@
 </script>
 
 <svelte:head>
-  <title>Novo Contrato - gprint</title>
+  <title>Novo Contrato - Pressly</title>
 </svelte:head>
 
 <div class="space-y-6">

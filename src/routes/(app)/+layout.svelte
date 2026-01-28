@@ -106,7 +106,7 @@
               <Printer class="h-5 w-5 text-[#00d4ff]" />
             </div>
             <span class="text-xl font-black text-[#00d4ff] tracking-wider text-glow-electric">
-              GPRINT
+              PRESSLY
             </span>
           </a>
           <button class="lg:hidden p-2 rounded-lg text-[#5a5a5a] hover:text-[#00d4ff] transition-colors" onclick={() => (sidebarOpen = false)}>

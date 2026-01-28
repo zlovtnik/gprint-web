@@ -1,42 +1,40 @@
-# sv
+# Pressly
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+> **Contract Printing Management System**  
+> Modern web application for multi-tenant contract lifecycle management.
 
-## Creating a project
+## Tech Stack
 
-If you're seeing this, you've probably already done this step. Congrats!
+- **Svelte 5** with Runes
+- **SvelteKit 2** for routing
+- **TypeScript** for type safety
+- **Tailwind CSS 4** for styling
+- **Bun** as runtime/package manager
 
-```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-npx sv create --template minimal --types ts --no-install .
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Getting Started
 
 ```sh
-npm run dev
+# Install dependencies
+bun install
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+# Start development server
+bun run dev
+
+# Build for production
+bun run build
+
+# Preview production build
+bun run preview
 ```
 
-## Building
+## Features
 
-To create a production version of your app:
+- 👥 Customer management
+- 📋 Service catalog
+- 📄 Contract creation, signing, and generation
+- 🖨️ Print job processing
+- 📊 Audit logging and history
 
-```sh
-npm run build
-```
+---
 
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+*Powered by Pressly*
