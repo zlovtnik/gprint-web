@@ -4,6 +4,7 @@ import { Ok, Err, type Result } from '$lib/utils/result';
 import type { ApiError, ApiResponse, PaginatedResponse } from '$lib/types/api';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8081';
+const INTEGRATION_API_BASE = import.meta.env.VITE_INTEGRATION_API_URL || 'http://localhost:4000/api';
 
 let authToken: string | null = null;
 
@@ -44,6 +45,33 @@ export const api: KyInstance = ky.create({
           onUnauthorized();
           // NOTE: resetLogoutGuard() must be called by the login flow after successful re-authentication
           // to clear isLoggingOut and allow future 401 handling
+        }
+      }
+    ]
+  }
+});
+
+// Integration API ky instance (separate backend)
+export const integrationApi: KyInstance = ky.create({
+  prefixUrl: INTEGRATION_API_BASE,
+  timeout: 30000,
+  hooks: {
+    beforeRequest: [
+      (request) => {
+        if (authToken) {
+          request.headers.set('Authorization', `Bearer ${authToken}`);
+        }
+        // Don't set Content-Type for FormData - let browser handle it
+        if (!(request.body instanceof FormData)) {
+          request.headers.set('Content-Type', 'application/json');
+        }
+      }
+    ],
+    afterResponse: [
+      async (_request, _options, response) => {
+        if (response.status === 401 && onUnauthorized && !isLoggingOut) {
+          isLoggingOut = true;
+          onUnauthorized();
         }
       }
     ]
@@ -191,4 +219,70 @@ export const buildSearchParams = <T extends Record<string, string | number | boo
 
   const str = searchParams.toString();
   return str ? `?${str}` : '';
+};
+
+// ============================================
+// Integration API fetch functions
+// ============================================
+
+// Type-safe Integration API wrapper returning Result
+export const fetchIntegrationApi = async <T>(
+  endpoint: string,
+  options?: Parameters<typeof integrationApi>[1]
+): Promise<Result<T, ApiError>> => {
+  try {
+    const rawResponse = await integrationApi(endpoint, options).json<ApiResponse<unknown>>();
+    const response = toCamelCaseKeys(rawResponse) as ApiResponse<T>;
+
+    if (response.success && response.data !== undefined) {
+      return Ok(response.data);
+    }
+
+    return Err((response as { success: false; error: ApiError }).error ?? { code: 'UNKNOWN', message: 'Unknown error occurred' });
+  } catch (error) {
+    if (error instanceof HTTPError) {
+      try {
+        const body = (await error.response.clone().json()) as ApiResponse<never>;
+        return Err({
+          code: (body as { success: false; error: ApiError }).error?.code ?? 'HTTP_ERROR',
+          message: (body as { success: false; error: ApiError }).error?.message ?? error.message,
+          details: (body as { success: false; error: ApiError }).error?.details
+        });
+      } catch {
+        try {
+          const rawBody = await error.response.text();
+          return Err({
+            code: 'HTTP_ERROR',
+            message: rawBody || `HTTP ${error.response.status}: ${error.message}`,
+            details: { rawBody }
+          });
+        } catch {
+          return Err({
+            code: 'HTTP_ERROR',
+            message: `HTTP ${error.response.status}: ${error.message}`
+          });
+        }
+      }
+    }
+
+    if (error instanceof Error) {
+      return Err({ code: 'NETWORK_ERROR', message: error.message });
+    }
+
+    return Err({ code: 'UNKNOWN_ERROR', message: String(error) });
+  }
+};
+
+// Wrap fetchIntegrationApi to auto-convert request body keys to snake_case
+export const fetchIntegrationApiSnake = async <T>(
+  endpoint: string,
+  options?: Parameters<typeof integrationApi>[1] & { json?: unknown }
+): Promise<Result<T, ApiError>> => {
+  const transformedOptions = options ? { ...options } : undefined;
+  
+  if (transformedOptions?.json) {
+    transformedOptions.json = toSnakeCaseKeys(transformedOptions.json);
+  }
+  
+  return fetchIntegrationApi<T>(endpoint, transformedOptions);
 };

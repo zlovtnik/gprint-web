@@ -1,69 +1,66 @@
-// Integration module types for GprintEx ETL, Routing, and Messaging
+// Integration types for ETL, Routing, and Messaging
 
 // ============================================
 // ETL Types
 // ============================================
 
-export type SessionStatus =
+export type ETLSessionStatus =
   | 'created'
   | 'loading'
+  | 'loaded'
   | 'transforming'
+  | 'transformed'
   | 'validating'
+  | 'validated'
   | 'promoting'
   | 'completed'
   | 'failed'
   | 'rolled_back';
 
 export interface ETLSession {
-  sessionId: string;
+  id: string;
   tenantId: string;
   sourceSystem: string;
-  status: SessionStatus;
-  totalRecords: number;
-  validRecords: number;
-  errorRecords: number;
-  promotedRecords: number;
+  status: ETLSessionStatus;
+  recordCount: number;
+  errorCount: number;
   createdAt: string;
-  completedAt: string | null;
+  updatedAt: string;
+  completedAt?: string;
+  metadata?: Record<string, unknown>;
 }
+
+export type StagingRecordStatus = 'pending' | 'transformed' | 'validated' | 'promoted' | 'failed';
 
 export interface StagingRecord {
-  seqNum: number;
+  id: string;
   sessionId: string;
-  tenantId: string;
-  entityType: 'CONTRACT' | 'CUSTOMER';
-  entityId: string;
-  rawData: Record<string, unknown>;
-  transformedData: Record<string, unknown> | null;
-  validationStatus: 'pending' | 'valid' | 'invalid';
-  errorMessage: string | null;
+  sourceData: Record<string, unknown>;
+  transformedData?: Record<string, unknown>;
+  status: StagingRecordStatus;
+  errors?: string[];
   createdAt: string;
+  updatedAt: string;
 }
+
+export type ValidationSeverity = 'error' | 'warning' | 'info';
 
 export interface ValidationResult {
-  recordId: number;
-  issueType: 'VALID' | 'MISSING_FIELD' | 'PARSE_ERROR' | 'CONSTRAINT';
+  recordId: string;
+  field?: string;
+  severity: ValidationSeverity;
+  code: string;
   message: string;
-  context: string | null;
-}
-
-export interface ImportConfig {
-  file: File;
-  format: 'csv' | 'json' | 'jsonl' | 'xml';
-  entityType: 'CONTRACT' | 'CUSTOMER';
-  sourceSystem: string;
-  encoding: 'utf8' | 'latin1' | 'utf16';
-  fieldMapping: Record<string, string>;
 }
 
 // ============================================
 // Routing Types
 // ============================================
 
-export type PatternType = 'exact' | 'glob' | 'regex' | 'function';
+export type RoutePatternType = 'exact' | 'prefix' | 'regex' | 'glob';
 
 export interface RoutePattern {
-  type: PatternType;
+  type: RoutePatternType;
   value: string;
 }
 
@@ -73,7 +70,9 @@ export interface RouteEntry {
   destination: string;
   priority: number;
   active: boolean;
-  metadata: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+  matchCount: number;
+  lastMatchedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -81,54 +80,57 @@ export interface RouteEntry {
 export interface RouteStats {
   totalRoutes: number;
   activeRoutes: number;
-  routedCount: number;
-  unroutedCount: number;
-  routeHits: Record<string, number>;
+  totalMatches: number;
+  topRoutes: Array<{
+    id: string;
+    pattern: string;
+    matchCount: number;
+  }>;
 }
 
 // ============================================
-// Message Types
+// Messaging Types
 // ============================================
 
-export type MessagePriority = 'low' | 'normal' | 'high' | 'critical';
-
-export interface Message {
-  id: string;
-  messageType: string;
-  payload: Record<string, unknown>;
-  metadata: Record<string, unknown>;
-  priority: MessagePriority;
-  timestamp: string;
-  correlationId: string | null;
-}
+export type ChannelStatus = 'active' | 'paused' | 'draining';
 
 export interface Channel {
   name: string;
+  status: ChannelStatus;
   queueSize: number;
-  subscriberCount: number;
-  stats: {
-    published: number;
-    delivered: number;
-    dropped: number;
-  };
+  consumerCount: number;
+  messageRate: number;
+  createdAt: string;
+  updatedAt: string;
+  metadata?: Record<string, unknown>;
 }
 
+export type AggregationStatus = 'pending' | 'complete' | 'timeout';
+
 export interface Aggregation {
-  id: number;
+  id: string;
   correlationId: string;
-  aggregationKey: string;
-  expectedCount: number | null;
-  currentCount: number;
-  status: 'pending' | 'complete' | 'timeout';
-  startedAt: string;
-  timeoutAt: string;
+  status: AggregationStatus;
+  expectedCount: number;
+  receivedCount: number;
+  messages: Array<{
+    id: string;
+    receivedAt: string;
+    payload: Record<string, unknown>;
+  }>;
+  timeoutAt?: string;
+  completedAt?: string;
+  createdAt: string;
 }
 
 export interface DeadLetterMessage {
   id: number;
-  originalMessageId: string;
-  messagePayload: string;
-  failureReason: string;
+  originalQueue: string;
+  errorMessage: string;
+  errorCode?: string;
   retryCount: number;
-  movedAt: string;
+  payload: Record<string, unknown>;
+  headers?: Record<string, string>;
+  failedAt: string;
+  createdAt: string;
 }
