@@ -4,4 +4,4 @@ export { toastStore, type ToastType } from './toast.svelte';
 export { customerStore } from './customers.svelte';
 export { serviceStore } from './services.svelte';
 export { contractStore } from './contracts.svelte';
-export { etlStore, routesStore, messagesStore } from './integrations.svelte';
+export { etlStore, pipelinesStore, integrationStore, channelsStore } from './integrations.svelte';

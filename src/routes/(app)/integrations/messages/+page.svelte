@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { messagesStore } from '$lib/stores/integrations.svelte';
+  import { channelsStore, integrationStore } from '$lib/stores/integrations.svelte';
   import Card from '$lib/components/ui/Card.svelte';
   import Button from '$lib/components/ui/Button.svelte';
   import Spinner from '$lib/components/ui/Spinner.svelte';
@@ -10,7 +10,7 @@
     RefreshCw,
     ArrowRight,
     AlertTriangle,
-    Layers
+    GitBranch
   } from 'lucide-svelte';
 
   let localLoading = $state(true);
@@ -21,9 +21,8 @@
     localError = null;
     try {
       await Promise.all([
-        messagesStore.loadChannels(),
-        messagesStore.loadAggregations(),
-        messagesStore.loadDeadLetterMessages({ limit: 5 })
+        channelsStore.loadChannels(),
+        integrationStore.loadRoutingRules()
       ]);
     } catch (e) {
       localError = e instanceof Error ? e.message : 'Failed to load messages data';
@@ -51,7 +50,7 @@
         Mensagens
       </h1>
       <p class="text-[#787878] mt-1">
-        Canais, agregações e monitoramento de mensagens
+        Canais e roteamento de mensagens de integração
       </p>
     </div>
     <Button variant="ghost" onclick={() => loadAllMessagesData()} disabled={localLoading}>
@@ -83,7 +82,7 @@
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Card class="!bg-[#0a0a0a] border-[#39ff14]/20 cursor-pointer hover:border-[#39ff14]/40 transition-colors"
-            onclick={() => goto('/integrations/messages/channels')}>
+            onclick={() => goto('/integrations/channels')}>
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
             <div class="p-3 rounded-lg bg-[#39ff14]/10">
@@ -92,10 +91,10 @@
             <div>
               <p class="text-sm text-[#787878]">Canais</p>
               <p class="text-2xl font-bold text-[#f0f0f0]">
-                {messagesStore.channels.length}
+                {channelsStore.channels.length}
               </p>
               <p class="text-xs text-[#39ff14]">
-                {messagesStore.totalQueueSize} mensagens na fila
+                {channelsStore.totalQueueSize} mensagens na fila
               </p>
             </div>
           </div>
@@ -104,19 +103,19 @@
       </Card>
 
       <Card class="!bg-[#0a0a0a] border-[#8000ff]/20 cursor-pointer hover:border-[#8000ff]/40 transition-colors"
-            onclick={() => goto('/integrations/messages/aggregations')}>
+            onclick={() => goto('/integrations/channels')}>
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
             <div class="p-3 rounded-lg bg-[#8000ff]/10">
-              <Layers class="h-6 w-6 text-[#8000ff]" />
+              <MessageSquare class="h-6 w-6 text-[#8000ff]" />
             </div>
             <div>
-              <p class="text-sm text-[#787878]">Agregações</p>
+              <p class="text-sm text-[#787878]">Canais Ativos</p>
               <p class="text-2xl font-bold text-[#f0f0f0]">
-                {messagesStore.aggregations.length}
+                {channelsStore.activeChannels.length}
               </p>
               <p class="text-xs text-[#8000ff]">
-                {messagesStore.pendingAggregations.length} pendentes
+                recebendo mensagens
               </p>
             </div>
           </div>
@@ -125,19 +124,19 @@
       </Card>
 
       <Card class="!bg-[#0a0a0a] border-[#ff0080]/20 cursor-pointer hover:border-[#ff0080]/40 transition-colors"
-            onclick={() => goto('/integrations/messages/dead-letter')}>
+            onclick={() => goto('/integrations/routes')}>
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
             <div class="p-3 rounded-lg bg-[#ff0080]/10">
-              <AlertTriangle class="h-6 w-6 text-[#ff0080]" />
+              <GitBranch class="h-6 w-6 text-[#ff0080]" />
             </div>
             <div>
-              <p class="text-sm text-[#787878]">Dead Letters</p>
+              <p class="text-sm text-[#787878]">Routing Rules</p>
               <p class="text-2xl font-bold text-[#f0f0f0]">
-                {messagesStore.deadLetterMessages.length}
+                {integrationStore.routingRules.length}
               </p>
               <p class="text-xs text-[#ff0080]">
-                requerem atenção
+                regras configuradas
               </p>
             </div>
           </div>
@@ -151,60 +150,65 @@
       <!-- Channels Overview -->
       <Card class="!bg-[#0a0a0a]">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-[#f0f0f0]">Canais Ativos</h2>
-          <Button variant="ghost" size="sm" onclick={() => goto('/integrations/messages/channels')}>
+          <h2 class="text-lg font-semibold text-[#f0f0f0]">Canais</h2>
+          <Button variant="ghost" size="sm" onclick={() => goto('/integrations/channels')}>
             Ver todos <ArrowRight class="h-4 w-4 ml-1" />
           </Button>
         </div>
 
-        {#if messagesStore.channels.length > 0}
+        {#if channelsStore.channels.length > 0}
           <div class="space-y-3">
-            {#each messagesStore.channels.slice(0, 5) as channel}
+            {#each channelsStore.channels.slice(0, 5) as channel}
               <div class="p-3 rounded-lg bg-[#111111] border border-[#2a2a2a]">
                 <div class="flex items-center justify-between">
                   <span class="font-medium text-[#c4c4c4]">{channel.name}</span>
-                  <Badge variant={channel.queueSize > 0 ? 'warning' : 'success'}>
-                    {channel.queueSize}
+                  <Badge variant={channel.status === 'active' ? 'success' : 'secondary'}>
+                    {channel.status}
                   </Badge>
+                </div>
+                <div class="mt-1 text-xs text-[#5a5a5a]">
+                  {channel.queueSize} mensagens na fila
                 </div>
               </div>
             {/each}
           </div>
         {:else}
           <div class="text-center py-6 text-[#5a5a5a]">
-            Nenhum canal ativo
+            Nenhum canal configurado
           </div>
         {/if}
       </Card>
 
-      <!-- Pending Aggregations -->
+      <!-- Routing Rules -->
       <Card class="!bg-[#0a0a0a]">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-[#f0f0f0]">Agregações Pendentes</h2>
-          <Button variant="ghost" size="sm" onclick={() => goto('/integrations/messages/aggregations')}>
+          <h2 class="text-lg font-semibold text-[#f0f0f0]">Routing Rules</h2>
+          <Button variant="ghost" size="sm" onclick={() => goto('/integrations/routes')}>
             Ver todas <ArrowRight class="h-4 w-4 ml-1" />
           </Button>
         </div>
 
-        {#if messagesStore.pendingAggregations.length > 0}
+        {#if integrationStore.routingRules.length > 0}
           <div class="space-y-3">
-            {#each messagesStore.pendingAggregations.slice(0, 5) as agg}
+            {#each integrationStore.routingRules.slice(0, 5) as rule}
               <div class="p-3 rounded-lg bg-[#111111] border border-[#2a2a2a]">
                 <div class="flex items-center justify-between">
-                  <span class="font-mono text-sm text-[#c4c4c4]">
-                    {agg.correlationId.slice(0, 12)}...
-                  </span>
-                  <Badge variant="warning">
-                    {agg.currentCount}/{agg.expectedCount ?? '?'}
+                  <span class="font-medium text-[#c4c4c4]">{rule.name}</span>
+                  <Badge variant="secondary">
+                    P: {rule.priority}
                   </Badge>
                 </div>
-                <p class="text-xs text-[#5a5a5a] mt-1">{agg.aggregationKey}</p>
+                <div class="mt-1 flex items-center gap-2 text-xs text-[#5a5a5a]">
+                  <span class="font-mono">{rule.pattern}</span>
+                  <ArrowRight class="h-3 w-3" />
+                  <span>{rule.destination}</span>
+                </div>
               </div>
             {/each}
           </div>
         {:else}
           <div class="text-center py-6 text-[#5a5a5a]">
-            Nenhuma agregação pendente
+            Nenhuma regra configurada
           </div>
         {/if}
       </Card>

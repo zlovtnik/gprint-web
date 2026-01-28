@@ -8,14 +8,14 @@ export { generationApi } from './generation';
 export { printJobsApi, type ListPrintJobsParams } from './print-jobs';
 export { 
   etlApi, 
-  routesApi, 
-  messagesApi,
+  pipelinesApi,
+  integrationApi,
+  channelsApi,
   type ListSessionsParams,
   type CreateSessionData,
-  type ListRoutesParams,
-  type CreateRouteData,
-  type UpdateRouteData,
+  type LoadDataPayload,
+  type CreateMessageData,
+  type TransformMessageData,
   type ListChannelsParams,
-  type ListAggregationsParams,
-  type ListDeadLetterParams
+  type CreateChannelData
 } from './integrations';

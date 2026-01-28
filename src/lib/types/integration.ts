@@ -1,4 +1,4 @@
-// Integration types for ETL, Routing, and Messaging
+// Integration types for ETL, Pipelines, Integration Messages, and Channels
 
 // ============================================
 // ETL Types
@@ -19,10 +19,12 @@ export type ETLSessionStatus =
 
 export interface ETLSession {
   id: string;
-  tenantId: string;
-  sourceSystem: string;
+  sessionId: string;  // UUID identifier
+  tenantId?: string;
+  sourceSystem?: string;
   status: ETLSessionStatus;
   recordCount: number;
+  totalRecords: number;
   errorCount: number;
   createdAt: string;
   updatedAt: string;
@@ -54,6 +56,33 @@ export interface ValidationResult {
 }
 
 // ============================================
+// Pipeline Types
+// ============================================
+
+export interface PipelineTemplate {
+  name: string;
+  description?: string;
+  steps: string[];
+  parameters?: Record<string, { type: string; required?: boolean; default?: unknown }>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type PipelineStatusState = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+
+export interface PipelineStatus {
+  sessionId: string;
+  pipelineName: string;
+  state: PipelineStatusState;
+  currentStep?: string;
+  progress?: number;
+  startedAt: string;
+  completedAt?: string;
+  error?: string;
+  results?: Record<string, unknown>;
+}
+
+// ============================================
 // Routing Types
 // ============================================
 
@@ -64,32 +93,41 @@ export interface RoutePattern {
   value: string;
 }
 
-export interface RouteEntry {
+export interface RoutingRule {
   id: string;
+  name: string;
   pattern: RoutePattern;
   destination: string;
   priority: number;
-  active: boolean;
+  active?: boolean;
+  conditions?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
-  matchCount: number;
-  lastMatchedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface RouteStats {
-  totalRoutes: number;
-  activeRoutes: number;
-  totalMatches: number;
-  topRoutes: Array<{
-    id: string;
-    pattern: string;
-    matchCount: number;
-  }>;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // ============================================
-// Messaging Types
+// Integration Message Types
+// ============================================
+
+export type IntegrationMessageStatus = 'pending' | 'processing' | 'processed' | 'failed' | 'dead_letter';
+
+export interface IntegrationMessage {
+  id: string;
+  type: string;
+  correlationId?: string;
+  status: IntegrationMessageStatus;
+  payload: Record<string, unknown>;
+  headers?: Record<string, string>;
+  retryCount: number;
+  createdAt: string;
+  updatedAt: string;
+  processedAt?: string;
+  error?: string;
+}
+
+// ============================================
+// Channel Types
 // ============================================
 
 export type ChannelStatus = 'active' | 'paused' | 'draining';
@@ -105,6 +143,10 @@ export interface Channel {
   metadata?: Record<string, unknown>;
 }
 
+// ============================================
+// Aggregation Types
+// ============================================
+
 export type AggregationStatus = 'pending' | 'complete' | 'timeout';
 
 export interface Aggregation {
@@ -112,7 +154,8 @@ export interface Aggregation {
   correlationId: string;
   status: AggregationStatus;
   expectedCount: number;
-  receivedCount: number;
+  currentCount: number;
+  receivedCount?: number;
   messages: Array<{
     id: string;
     receivedAt: string;
@@ -122,6 +165,10 @@ export interface Aggregation {
   completedAt?: string;
   createdAt: string;
 }
+
+// ============================================
+// Dead Letter Types
+// ============================================
 
 export interface DeadLetterMessage {
   id: number;

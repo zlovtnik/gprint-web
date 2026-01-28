@@ -1,14 +1,13 @@
-// Integration stores for ETL, Routing, and Messaging
-import { etlApi, routesApi, messagesApi } from '$lib/api/integrations';
+// Integration stores for ETL, Pipelines, Integration Messages, and Channels
+import { etlApi, pipelinesApi, integrationApi, channelsApi } from '$lib/api/integrations';
 import type {
   ETLSession,
-  StagingRecord,
   ValidationResult,
-  RouteEntry,
-  RouteStats,
+  PipelineTemplate,
+  PipelineStatus,
+  RoutingRule,
   Channel,
-  Aggregation,
-  DeadLetterMessage
+  Aggregation
 } from '$lib/types/integration';
 
 // ============================================
@@ -18,7 +17,6 @@ import type {
 class ETLStore {
   sessions = $state<ETLSession[]>([]);
   currentSession = $state<ETLSession | null>(null);
-  stagingRecords = $state<StagingRecord[]>([]);
   validationResults = $state<ValidationResult[]>([]);
   loading = $state(false);
   error = $state<string | null>(null);
@@ -69,13 +67,58 @@ class ETLStore {
     }
   }
 
-  async createSession(tenantId: string, sourceSystem: string) {
+  async createSession(data?: { tenantId?: string; sourceSystem?: string }) {
     this.loading = true;
     try {
-      const result = await etlApi.createSession({ tenantId, sourceSystem });
+      const result = await etlApi.createSession(data);
       if (result.ok) {
         await this.loadSessions();
-        return result.value.sessionId;
+        return result.value;
+      }
+      this.error = result.error.message;
+      return null;
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async deleteSession(sessionId: string) {
+    this.loading = true;
+    try {
+      const result = await etlApi.deleteSession(sessionId);
+      if (result.ok) {
+        await this.loadSessions();
+        return true;
+      }
+      this.error = result.error.message;
+      return false;
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async loadData(sessionId: string, data: Record<string, unknown>[], config?: Record<string, unknown>) {
+    this.loading = true;
+    try {
+      const result = await etlApi.loadData(sessionId, { data, config });
+      if (result.ok) {
+        await this.loadSession(sessionId);
+        return result.value;
+      }
+      this.error = result.error.message;
+      return null;
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async transformSession(sessionId: string) {
+    this.loading = true;
+    try {
+      const result = await etlApi.transformSession(sessionId);
+      if (result.ok) {
+        await this.loadSession(sessionId);
+        return result.value;
       }
       this.error = result.error.message;
       return null;
@@ -115,12 +158,90 @@ class ETLStore {
     }
   }
 
-  async rollbackSession(sessionId: string) {
+  async cleanup(olderThanDays?: number) {
     this.loading = true;
     try {
-      const result = await etlApi.rollbackSession(sessionId);
+      const result = await etlApi.cleanup({ olderThanDays });
       if (result.ok) {
-        await this.loadSession(sessionId);
+        await this.loadSessions();
+        return result.value;
+      }
+      this.error = result.error.message;
+      return null;
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  clearError() {
+    this.error = null;
+  }
+}
+
+// ============================================
+// Pipelines Store
+// ============================================
+
+class PipelinesStore {
+  templates = $state<PipelineTemplate[]>([]);
+  currentStatus = $state<PipelineStatus | null>(null);
+  loading = $state(false);
+  error = $state<string | null>(null);
+
+  async loadTemplates() {
+    this.loading = true;
+    this.error = null;
+    try {
+      const result = await pipelinesApi.listTemplates();
+      if (result.ok) {
+        this.templates = result.value;
+      } else {
+        this.error = result.error.message;
+      }
+    } catch (e) {
+      this.error = e instanceof Error ? e.message : 'Failed to load templates';
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async runPipeline(name: string, params?: Record<string, unknown>) {
+    this.loading = true;
+    try {
+      const result = await pipelinesApi.runPipeline(name, params);
+      if (result.ok) {
+        return result.value;
+      }
+      this.error = result.error.message;
+      return null;
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async loadStatus(sessionId: string) {
+    this.loading = true;
+    this.error = null;
+    try {
+      const result = await pipelinesApi.getStatus(sessionId);
+      if (result.ok) {
+        this.currentStatus = result.value;
+      } else {
+        this.error = result.error.message;
+      }
+    } catch (e) {
+      this.error = e instanceof Error ? e.message : 'Failed to load pipeline status';
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async cancelPipeline(sessionId: string) {
+    this.loading = true;
+    try {
+      const result = await pipelinesApi.cancelPipeline(sessionId);
+      if (result.ok) {
+        this.currentStatus = null;
         return true;
       }
       this.error = result.error.message;
@@ -136,121 +257,160 @@ class ETLStore {
 }
 
 // ============================================
-// Routes Store
+// Integration Messages Store
 // ============================================
 
-class RoutesStore {
-  routes = $state<RouteEntry[]>([]);
-  currentRoute = $state<RouteEntry | null>(null);
-  stats = $state<RouteStats | null>(null);
+class IntegrationStore {
+  routingRules = $state<RoutingRule[]>([]);
+  aggregations = $state<Aggregation[]>([]);
   loading = $state(false);
   error = $state<string | null>(null);
 
   // Derived
-  activeRoutes = $derived(this.routes.filter((r) => r.active));
+  pendingAggregations = $derived(this.aggregations.filter((a) => a.status === 'pending'));
 
-  async loadRoutes(params?: { active?: boolean; limit?: number }) {
+  async loadRoutingRules() {
     this.loading = true;
     this.error = null;
     try {
-      const result = await routesApi.listRoutes(params);
+      const result = await integrationApi.getRoutingRules();
       if (result.ok) {
-        this.routes = result.value;
+        this.routingRules = result.value;
       } else {
         this.error = result.error.message;
       }
     } catch (e) {
-      this.error = e instanceof Error ? e.message : 'Failed to load routes';
+      this.error = e instanceof Error ? e.message : 'Failed to load routing rules';
     } finally {
       this.loading = false;
     }
   }
 
-  async loadRoute(id: string) {
+  async createMessage(data: { type: string; payload: Record<string, unknown>; correlationId?: string }) {
     this.loading = true;
-    this.error = null;
     try {
-      const result = await routesApi.getRoute(id);
+      const result = await integrationApi.createMessage(data);
       if (result.ok) {
-        this.currentRoute = result.value;
-      } else {
-        this.error = result.error.message;
+        return result.value;
       }
-    } catch (e) {
-      this.error = e instanceof Error ? e.message : 'Failed to load route';
-      console.error('Failed to load route:', e);
+      this.error = result.error.message;
+      return null;
     } finally {
       this.loading = false;
     }
   }
 
-  async loadStats() {
+  async transformMessage(message: Record<string, unknown>, format: string, options?: Record<string, unknown>) {
+    this.loading = true;
     try {
-      const result = await routesApi.getRouteStats();
+      const result = await integrationApi.transformMessage({ message, format, options });
       if (result.ok) {
-        this.stats = result.value;
+        return result.value.transformed;
       }
+      this.error = result.error.message;
+      return null;
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async checkDuplicate(messageId: string, correlationId?: string) {
+    try {
+      const result = await integrationApi.checkDuplicate(messageId, correlationId);
+      if (result.ok) {
+        return result.value;
+      }
+      return null;
     } catch {
-      // Stats loading is non-critical
-    }
-  }
-
-  async createRoute(data: Parameters<typeof routesApi.createRoute>[0]) {
-    this.loading = true;
-    try {
-      const result = await routesApi.createRoute(data);
-      if (result.ok) {
-        await this.loadRoutes();
-        return result.value;
-      }
-      this.error = result.error.message;
       return null;
-    } finally {
-      this.loading = false;
     }
   }
 
-  async updateRoute(id: string, data: Parameters<typeof routesApi.updateRoute>[1]) {
-    this.loading = true;
+  async markProcessed(id: string) {
     try {
-      const result = await routesApi.updateRoute(id, data);
-      if (result.ok) {
-        await this.loadRoutes();
-        return result.value;
-      }
-      this.error = result.error.message;
-      return null;
-    } finally {
-      this.loading = false;
-    }
-  }
-
-  async deleteRoute(id: string) {
-    this.loading = true;
-    try {
-      const result = await routesApi.deleteRoute(id);
-      if (result.ok) {
-        await this.loadRoutes();
-        return true;
-      }
-      this.error = result.error.message;
+      const result = await integrationApi.markProcessed(id);
+      return result.ok;
+    } catch {
       return false;
+    }
+  }
+
+  async retryMessage(id: string) {
+    this.loading = true;
+    try {
+      const result = await integrationApi.retryMessage(id);
+      if (result.ok) {
+        return result.value;
+      }
+      this.error = result.error.message;
+      return null;
     } finally {
       this.loading = false;
     }
   }
 
-  async toggleRoute(id: string) {
+  async moveToDeadLetter(id: string, reason?: string) {
+    this.loading = true;
     try {
-      const result = await routesApi.toggleRoute(id);
+      const result = await integrationApi.moveToDeadLetter(id, reason);
       if (result.ok) {
-        await this.loadRoutes();
+        return result.value;
+      }
+      this.error = result.error.message;
+      return null;
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async startAggregation(correlationId: string, expectedCount: number, timeoutMs?: number) {
+    this.loading = true;
+    try {
+      const result = await integrationApi.startAggregation(correlationId, expectedCount, timeoutMs);
+      if (result.ok) {
+        // Add new aggregation to local state
+        this.aggregations = [...this.aggregations, result.value];
+        return result.value;
+      }
+      this.error = result.error.message;
+      return null;
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async addToAggregation(aggregationId: string, message: Record<string, unknown>) {
+    try {
+      const result = await integrationApi.addToAggregation(aggregationId, message);
+      if (result.ok) {
+        // Update aggregation in local state
+        this.aggregations = this.aggregations.map((agg) =>
+          agg.id === aggregationId ? result.value : agg
+        );
         return result.value;
       }
       this.error = result.error.message;
       return null;
     } catch {
       return null;
+    }
+  }
+
+  async completeAggregation(aggregationId: string) {
+    this.loading = true;
+    try {
+      const result = await integrationApi.completeAggregation(aggregationId);
+      if (result.ok) {
+        // Update aggregation status in local state
+        this.aggregations = this.aggregations.map((agg) =>
+          agg.id === aggregationId ? result.value : agg
+        );
+        return result.value;
+      }
+      this.error = result.error.message;
+      return null;
+    } finally {
+      this.loading = false;
     }
   }
 
@@ -260,27 +420,24 @@ class RoutesStore {
 }
 
 // ============================================
-// Messages Store
+// Channels Store
 // ============================================
 
-class MessagesStore {
+class ChannelsStore {
   channels = $state<Channel[]>([]);
   currentChannel = $state<Channel | null>(null);
-  aggregations = $state<Aggregation[]>([]);
-  deadLetterMessages = $state<DeadLetterMessage[]>([]);
   loading = $state(false);
   error = $state<string | null>(null);
 
   // Derived
   totalQueueSize = $derived(this.channels.reduce((sum, ch) => sum + ch.queueSize, 0));
-
-  pendingAggregations = $derived(this.aggregations.filter((a) => a.status === 'pending'));
+  activeChannels = $derived(this.channels.filter((ch) => ch.status === 'active'));
 
   async loadChannels(params?: { limit?: number }) {
     this.loading = true;
     this.error = null;
     try {
-      const result = await messagesApi.listChannels(params);
+      const result = await channelsApi.listChannels(params);
       if (result.ok) {
         this.channels = result.value;
       } else {
@@ -293,11 +450,26 @@ class MessagesStore {
     }
   }
 
+  async createChannel(name: string, metadata?: Record<string, unknown>) {
+    this.loading = true;
+    try {
+      const result = await channelsApi.createChannel({ name, metadata });
+      if (result.ok) {
+        await this.loadChannels();
+        return result.value;
+      }
+      this.error = result.error.message;
+      return null;
+    } finally {
+      this.loading = false;
+    }
+  }
+
   async loadChannel(name: string) {
     this.loading = true;
     this.error = null;
     try {
-      const result = await messagesApi.getChannel(name);
+      const result = await channelsApi.getChannel(name);
       if (result.ok) {
         this.currentChannel = result.value;
       } else {
@@ -305,70 +477,23 @@ class MessagesStore {
       }
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to load channel';
-      console.error('Failed to load channel:', e);
     } finally {
       this.loading = false;
     }
   }
 
-  async loadAggregations(params?: { status?: 'pending' | 'complete' | 'timeout'; limit?: number }) {
+  async drainChannel(name: string) {
     this.loading = true;
-    this.error = null;
     try {
-      const result = await messagesApi.listAggregations(params);
+      const result = await channelsApi.drainChannel(name);
       if (result.ok) {
-        this.aggregations = result.value;
-      } else {
-        this.error = result.error.message;
-      }
-    } finally {
-      this.loading = false;
-    }
-  }
-
-  async loadDeadLetterMessages(params?: { limit?: number }) {
-    this.loading = true;
-    this.error = null;
-    try {
-      const result = await messagesApi.listDeadLetterMessages(params);
-      if (result.ok) {
-        this.deadLetterMessages = result.value;
-      } else {
-        this.error = result.error.message;
-      }
-    } catch (e) {
-      this.error = e instanceof Error ? e.message : 'Failed to load dead letter messages';
-      console.error('Failed to load dead letter messages:', e);
-    } finally {
-      this.loading = false;
-    }
-  }
-
-  async retryDeadLetter(id: number) {
-    try {
-      const result = await messagesApi.retryDeadLetterMessage(id);
-      if (result.ok) {
-        await this.loadDeadLetterMessages();
-        return true;
+        await this.loadChannels();
+        return result.value;
       }
       this.error = result.error.message;
-      return false;
-    } catch {
-      return false;
-    }
-  }
-
-  async deleteDeadLetter(id: number) {
-    try {
-      const result = await messagesApi.deleteDeadLetterMessage(id);
-      if (result.ok) {
-        await this.loadDeadLetterMessages();
-        return true;
-      }
-      this.error = result.error.message;
-      return false;
-    } catch {
-      return false;
+      return null;
+    } finally {
+      this.loading = false;
     }
   }
 
@@ -379,5 +504,6 @@ class MessagesStore {
 
 // Export singleton instances
 export const etlStore = new ETLStore();
-export const routesStore = new RoutesStore();
-export const messagesStore = new MessagesStore();
+export const pipelinesStore = new PipelinesStore();
+export const integrationStore = new IntegrationStore();
+export const channelsStore = new ChannelsStore();

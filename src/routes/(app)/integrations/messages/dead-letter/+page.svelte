@@ -1,60 +1,22 @@
 <script lang="ts">
-  import { messagesStore } from '$lib/stores/integrations.svelte';
+  import { goto } from '$app/navigation';
+  import { integrationStore } from '$lib/stores/integrations.svelte';
   import Card from '$lib/components/ui/Card.svelte';
   import Button from '$lib/components/ui/Button.svelte';
-  import Spinner from '$lib/components/ui/Spinner.svelte';
-  import Badge from '$lib/components/ui/Badge.svelte';
   import {
     AlertTriangle,
-    RefreshCw,
-    RotateCcw,
-    Trash2,
-    Clock,
-    AlertCircle
+    ArrowLeft,
+    MessageSquare,
+    RefreshCw
   } from 'lucide-svelte';
 
-  let retryingId = $state<number | null>(null);
-  let deletingId = $state<number | null>(null);
-  let actionError = $state<string | null>(null);
+  let retrying = $state(false);
 
-  $effect(() => {
-    messagesStore.loadDeadLetterMessages();
-  });
-
-  async function handleRetry(id: number) {
-    retryingId = id;
-    actionError = null;
-    try {
-      const success = await messagesStore.retryDeadLetter(id);
-      if (!success) {
-        actionError = `Falha ao reprocessar mensagem ${id}: ${messagesStore.error || 'Erro desconhecido'}`;
-      }
-    } catch (e) {
-      actionError = `Falha ao reprocessar mensagem ${id}: ${e instanceof Error ? e.message : 'Erro desconhecido'}`;
-      console.error('Failed to retry dead letter:', e);
-    } finally {
-      retryingId = null;
-    }
-  }
-
-  async function handleDelete(id: number) {
-    deletingId = id;
-    actionError = null;
-    try {
-      const success = await messagesStore.deleteDeadLetter(id);
-      if (!success) {
-        actionError = `Falha ao excluir mensagem ${id}: ${messagesStore.error || 'Erro desconhecido'}`;
-      }
-    } catch (e) {
-      actionError = `Falha ao excluir mensagem ${id}: ${e instanceof Error ? e.message : 'Erro desconhecido'}`;
-      console.error('Failed to delete dead letter:', e);
-    } finally {
-      deletingId = null;
-    }
-  }
-
-  function formatDate(dateStr: string) {
-    return new Date(dateStr).toLocaleString('pt-BR');
+  async function handleRetryMessage(messageId: string) {
+    retrying = true;
+    const result = await integrationStore.retryMessage(messageId);
+    retrying = false;
+    return result;
   }
 </script>
 
@@ -71,125 +33,70 @@
         Dead Letter Queue
       </h1>
       <p class="text-[#787878] mt-1">
-        Mensagens que falharam no processamento
+        Gerenciamento de mensagens com falha
       </p>
     </div>
-    <Button variant="ghost" onclick={() => messagesStore.loadDeadLetterMessages()} disabled={messagesStore.loading}>
-      <RefreshCw class="h-4 w-4 {messagesStore.loading ? 'animate-spin' : ''}" />
+    <Button variant="ghost" onclick={() => goto('/integrations/messages')}>
+      <ArrowLeft class="h-4 w-4 mr-2" />
+      Voltar
     </Button>
   </div>
 
-  {#if actionError}
-    <Card class="!bg-[#0a0a0a] border-[#ff0080]/30">
-      <div class="flex items-center gap-4 p-4">
-        <div class="p-2 rounded-lg bg-[#ff0080]/10">
-          <AlertCircle class="h-5 w-5 text-[#ff0080]" />
-        </div>
-        <p class="flex-1 text-sm text-[#ff0080]">{actionError}</p>
-        <Button variant="ghost" size="sm" onclick={() => actionError = null}>
-          Fechar
-        </Button>
+  <!-- Info Card -->
+  <Card class="!bg-[#0a0a0a] border-[#8000ff]/20">
+    <div class="flex items-start gap-4 p-4">
+      <div class="p-3 rounded-lg bg-[#8000ff]/10">
+        <MessageSquare class="h-6 w-6 text-[#8000ff]" />
       </div>
-    </Card>
-  {/if}
-
-  <!-- Stats -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <Card class="!bg-[#0a0a0a] border-[#ff0080]/20">
-      <div class="flex items-center gap-4">
-        <div class="p-3 rounded-lg bg-[#ff0080]/10">
-          <AlertCircle class="h-6 w-6 text-[#ff0080]" />
-        </div>
-        <div>
-          <p class="text-sm text-[#787878]">Total na Fila</p>
-          <p class="text-2xl font-bold text-[#f0f0f0]">
-            {messagesStore.deadLetterMessages.length}
-          </p>
-        </div>
-      </div>
-    </Card>
-  </div>
-
-  <!-- Messages List -->
-  <Card class="!bg-[#0a0a0a]">
-    {#if messagesStore.loading && messagesStore.deadLetterMessages.length === 0}
-      <div class="flex justify-center py-12">
-        <Spinner size="lg" />
-      </div>
-    {:else if messagesStore.deadLetterMessages.length === 0}
-      <div class="text-center py-12">
-        <AlertTriangle class="h-16 w-16 mx-auto mb-4 text-[#39ff14]" />
-        <h3 class="text-lg font-medium text-[#787878]">Nenhuma mensagem na DLQ</h3>
-        <p class="text-sm text-[#5a5a5a] mt-1">
-          Ótimo! Todas as mensagens foram processadas com sucesso.
+      <div class="flex-1">
+        <h3 class="font-semibold text-[#f0f0f0]">Gerenciamento de Mensagens</h3>
+        <p class="text-sm text-[#787878] mt-2">
+          Use a API de integração para gerenciar mensagens:
         </p>
+        <ul class="mt-3 space-y-2 text-sm text-[#5a5a5a]">
+          <li class="flex items-center gap-2">
+            <RefreshCw class="h-4 w-4 text-[#00d4ff]" />
+            <code class="px-2 py-0.5 bg-[#1a1a1a] rounded text-[#c4c4c4]">POST /v1/integration/messages/:id/retry</code>
+            - Reprocessar mensagem
+          </li>
+          <li class="flex items-center gap-2">
+            <AlertTriangle class="h-4 w-4 text-[#ff0080]" />
+            <code class="px-2 py-0.5 bg-[#1a1a1a] rounded text-[#c4c4c4]">POST /v1/integration/messages/:id/dead-letter</code>
+            - Mover para DLQ
+          </li>
+        </ul>
+      </div>
+    </div>
+  </Card>
+
+  <!-- Routing Rules Card -->
+  <Card class="!bg-[#0a0a0a]">
+    <div class="p-4 border-b border-[#2a2a2a]">
+      <h2 class="text-lg font-semibold text-[#f0f0f0]">Regras de Roteamento</h2>
+      <p class="text-sm text-[#787878] mt-1">
+        Configure regras para rotear mensagens automaticamente
+      </p>
+    </div>
+    
+    {#if integrationStore.routingRules.length === 0}
+      <div class="text-center py-8">
+        <AlertTriangle class="h-12 w-12 mx-auto mb-3 text-[#2a2a2a]" />
+        <p class="text-sm text-[#5a5a5a]">Nenhuma regra configurada</p>
+        <Button variant="ghost" class="mt-3" onclick={() => goto('/integrations/routes')}>
+          Configurar Regras
+        </Button>
       </div>
     {:else}
       <div class="space-y-3 p-4">
-        {#each messagesStore.deadLetterMessages as msg}
-          <div 
-            class="p-4 rounded-lg bg-[#111111] border border-[#ff0080]/20 
-                   hover:border-[#ff0080]/40 transition-colors"
-          >
-            <div class="flex items-start justify-between gap-4">
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-3">
-                  <span class="font-mono text-sm text-[#c4c4c4]">
-                    {msg.originalMessageId}
-                  </span>
-                  <Badge variant="danger">
-                    {msg.retryCount} retries
-                  </Badge>
-                </div>
-                
-                <p class="mt-2 text-sm text-[#ff0080]">
-                  {msg.failureReason}
-                </p>
-
-                <div class="mt-2 flex items-center gap-2 text-xs text-[#5a5a5a]">
-                  <Clock class="h-3 w-3" />
-                  <span>Movida em: {formatDate(msg.movedAt)}</span>
-                </div>
-              </div>
-
-              <div class="flex items-center gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  disabled={retryingId === msg.id}
-                  onclick={() => handleRetry(msg.id)}
-                >
-                  {#if retryingId === msg.id}
-                    <Spinner size="sm" />
-                  {:else}
-                    <RotateCcw class="h-4 w-4 text-[#00d4ff]" />
-                  {/if}
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  disabled={deletingId === msg.id}
-                  onclick={() => handleDelete(msg.id)}
-                >
-                  {#if deletingId === msg.id}
-                    <Spinner size="sm" />
-                  {:else}
-                    <Trash2 class="h-4 w-4 text-[#ff0080]" />
-                  {/if}
-                </Button>
-              </div>
+        {#each integrationStore.routingRules as rule}
+          <div class="p-3 rounded-lg bg-[#111111] border border-[#2a2a2a]">
+            <div class="flex items-center justify-between">
+              <span class="font-medium text-[#c4c4c4]">{rule.name}</span>
+              <span class="text-xs text-[#787878]">Prioridade: {rule.priority}</span>
             </div>
-
-            {#if msg.messagePayload}
-              <details class="mt-3">
-                <summary class="text-xs text-[#787878] cursor-pointer hover:text-[#c4c4c4]">
-                  Ver payload
-                </summary>
-                <pre class="mt-2 p-3 rounded bg-[#0a0a0a] text-xs text-[#c4c4c4] overflow-x-auto">
-{msg.messagePayload}
-                </pre>
-              </details>
-            {/if}
+            <div class="mt-1 text-xs text-[#5a5a5a]">
+              {rule.pattern} → {rule.destination}
+            </div>
           </div>
         {/each}
       </div>
