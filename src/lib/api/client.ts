@@ -6,6 +6,13 @@ import type { ApiError, ApiResponse, PaginatedResponse } from '$lib/types/api';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8081';
 const INTEGRATION_API_BASE = import.meta.env.VITE_INTEGRATION_API_URL || 'http://localhost:4000/api';
 
+// Validate URLs have proper protocol
+if (typeof window !== 'undefined') {
+  if (INTEGRATION_API_BASE && !INTEGRATION_API_BASE.startsWith('http://') && !INTEGRATION_API_BASE.startsWith('https://')) {
+    console.error(`[API Client] Invalid VITE_INTEGRATION_API_URL: "${INTEGRATION_API_BASE}" - must start with http:// or https://`);
+  }
+}
+
 let authToken: string | null = null;
 
 export const setAuthToken = (token: string | null) => {
