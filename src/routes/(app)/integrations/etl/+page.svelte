@@ -26,6 +26,7 @@
     sourceSystem: ''
   });
   let creating = $state(false);
+  let createError = $state<string | null>(null);
 
   const sourceSystemOptions = [
     { value: 'CLM', label: 'CLM - Contract Lifecycle Management' },
@@ -42,15 +43,20 @@
     if (!newSession.tenantId || !newSession.sourceSystem) return;
     
     creating = true;
+    createError = null;
     try {
       const sessionId = await etlStore.createSession(newSession.tenantId, newSession.sourceSystem);
       
       if (sessionId) {
         showCreateModal = false;
         newSession = { tenantId: '', sourceSystem: '' };
+        createError = null;
         goto(`/integrations/etl/sessions/${sessionId}`);
+      } else if (etlStore.error) {
+        createError = etlStore.error;
       }
     } catch (e) {
+      createError = e instanceof Error ? e.message : 'Falha ao criar sessão';
       console.error('Failed to create session:', e);
     } finally {
       creating = false;
@@ -226,6 +232,12 @@
 <!-- Create Session Modal -->
 <Modal bind:open={showCreateModal} title="Nova Sessão ETL">
   <form onsubmit={(e) => { e.preventDefault(); handleCreateSession(); }} class="space-y-4">
+    {#if createError}
+      <div class="p-3 rounded-lg bg-[#ff0080]/10 border border-[#ff0080]/30">
+        <p class="text-sm text-[#ff0080]">{createError}</p>
+      </div>
+    {/if}
+    
     <Input
       label="Tenant ID"
       bind:value={newSession.tenantId}

@@ -15,6 +15,7 @@
 
   let retryingId = $state<number | null>(null);
   let deletingId = $state<number | null>(null);
+  let actionError = $state<string | null>(null);
 
   $effect(() => {
     messagesStore.loadDeadLetterMessages();
@@ -22,8 +23,15 @@
 
   async function handleRetry(id: number) {
     retryingId = id;
+    actionError = null;
     try {
-      await messagesStore.retryDeadLetter(id);
+      const success = await messagesStore.retryDeadLetter(id);
+      if (!success) {
+        actionError = `Falha ao reprocessar mensagem ${id}: ${messagesStore.error || 'Erro desconhecido'}`;
+      }
+    } catch (e) {
+      actionError = `Falha ao reprocessar mensagem ${id}: ${e instanceof Error ? e.message : 'Erro desconhecido'}`;
+      console.error('Failed to retry dead letter:', e);
     } finally {
       retryingId = null;
     }
@@ -31,8 +39,15 @@
 
   async function handleDelete(id: number) {
     deletingId = id;
+    actionError = null;
     try {
-      await messagesStore.deleteDeadLetter(id);
+      const success = await messagesStore.deleteDeadLetter(id);
+      if (!success) {
+        actionError = `Falha ao excluir mensagem ${id}: ${messagesStore.error || 'Erro desconhecido'}`;
+      }
+    } catch (e) {
+      actionError = `Falha ao excluir mensagem ${id}: ${e instanceof Error ? e.message : 'Erro desconhecido'}`;
+      console.error('Failed to delete dead letter:', e);
     } finally {
       deletingId = null;
     }
@@ -63,6 +78,20 @@
       <RefreshCw class="h-4 w-4 {messagesStore.loading ? 'animate-spin' : ''}" />
     </Button>
   </div>
+
+  {#if actionError}
+    <Card class="!bg-[#0a0a0a] border-[#ff0080]/30">
+      <div class="flex items-center gap-4 p-4">
+        <div class="p-2 rounded-lg bg-[#ff0080]/10">
+          <AlertCircle class="h-5 w-5 text-[#ff0080]" />
+        </div>
+        <p class="flex-1 text-sm text-[#ff0080]">{actionError}</p>
+        <Button variant="ghost" size="sm" onclick={() => actionError = null}>
+          Fechar
+        </Button>
+      </div>
+    </Card>
+  {/if}
 
   <!-- Stats -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">

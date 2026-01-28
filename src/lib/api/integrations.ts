@@ -44,7 +44,7 @@ export const etlApi = {
     fetchApi<ETLSession[]>(prefixIntegrationUrl(`etl/sessions${buildSearchParams(params ?? {})}`)),
 
   getSession: (id: string): Promise<Result<ETLSession, ApiError>> =>
-    fetchApi<ETLSession>(prefixIntegrationUrl(`etl/sessions/${id}`)),
+    fetchApi<ETLSession>(prefixIntegrationUrl(`etl/sessions/${encodeURIComponent(id)}`)),
 
   createSession: (data: CreateSessionData): Promise<Result<{ sessionId: string }, ApiError>> =>
     fetchApiSnake<{ sessionId: string }>(prefixIntegrationUrl('etl/sessions'), {
@@ -58,24 +58,24 @@ export const etlApi = {
     params?: { status?: string; page?: number }
   ): Promise<Result<PaginatedResponse<StagingRecord>, ApiError>> =>
     fetchApi<PaginatedResponse<StagingRecord>>(
-      prefixIntegrationUrl(`etl/sessions/${sessionId}/staging${buildSearchParams(params ?? {})}`)
+      prefixIntegrationUrl(`etl/sessions/${encodeURIComponent(sessionId)}/staging${buildSearchParams(params ?? {})}`)
     ),
 
   // Transformation
   transformSession: (sessionId: string): Promise<Result<void, ApiError>> =>
-    fetchApi<void>(prefixIntegrationUrl(`etl/sessions/${sessionId}/transform`), { method: 'POST' }),
+    fetchApi<void>(prefixIntegrationUrl(`etl/sessions/${encodeURIComponent(sessionId)}/transform`), { method: 'POST' }),
 
   // Validation
   validateSession: (sessionId: string): Promise<Result<ValidationResult[], ApiError>> =>
-    fetchApi<ValidationResult[]>(prefixIntegrationUrl(`etl/sessions/${sessionId}/validate`), { method: 'POST' }),
+    fetchApi<ValidationResult[]>(prefixIntegrationUrl(`etl/sessions/${encodeURIComponent(sessionId)}/validate`), { method: 'POST' }),
 
   // Promotion
   promoteSession: (sessionId: string): Promise<Result<{ promotedCount: number }, ApiError>> =>
-    fetchApi<{ promotedCount: number }>(prefixIntegrationUrl(`etl/sessions/${sessionId}/promote`), { method: 'POST' }),
+    fetchApi<{ promotedCount: number }>(prefixIntegrationUrl(`etl/sessions/${encodeURIComponent(sessionId)}/promote`), { method: 'POST' }),
 
   // Rollback
   rollbackSession: (sessionId: string): Promise<Result<void, ApiError>> =>
-    fetchApi<void>(prefixIntegrationUrl(`etl/sessions/${sessionId}/rollback`), { method: 'POST' }),
+    fetchApi<void>(prefixIntegrationUrl(`etl/sessions/${encodeURIComponent(sessionId)}/rollback`), { method: 'POST' }),
 
   // File upload
   uploadFile: async (
@@ -87,7 +87,7 @@ export const etlApi = {
     formData.append('file', file);
     formData.append('config', JSON.stringify(config));
 
-    return fetchApi<{ recordsLoaded: number }>(prefixIntegrationUrl(`etl/sessions/${sessionId}/upload`), {
+    return fetchApi<{ recordsLoaded: number }>(prefixIntegrationUrl(`etl/sessions/${encodeURIComponent(sessionId)}/upload`), {
       method: 'POST',
       body: formData,
       headers: {} // Let browser set content-type for FormData

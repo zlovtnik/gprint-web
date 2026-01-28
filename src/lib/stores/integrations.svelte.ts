@@ -176,6 +176,9 @@ class RoutesStore {
       } else {
         this.error = result.error.message;
       }
+    } catch (e) {
+      this.error = e instanceof Error ? e.message : 'Failed to load route';
+      console.error('Failed to load route:', e);
     } finally {
       this.loading = false;
     }
@@ -300,6 +303,9 @@ class MessagesStore {
       } else {
         this.error = result.error.message;
       }
+    } catch (e) {
+      this.error = e instanceof Error ? e.message : 'Failed to load channel';
+      console.error('Failed to load channel:', e);
     } finally {
       this.loading = false;
     }
@@ -330,6 +336,9 @@ class MessagesStore {
       } else {
         this.error = result.error.message;
       }
+    } catch (e) {
+      this.error = e instanceof Error ? e.message : 'Failed to load dead letter messages';
+      console.error('Failed to load dead letter messages:', e);
     } finally {
       this.loading = false;
     }

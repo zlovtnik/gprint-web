@@ -15,14 +15,14 @@
 
   let { color, variant, size = 'md', children }: Props = $props();
 
-  // Map variant to color
+  // Map variant to color (info uses blue/cyan for informational messaging)
   const variantToColor: Record<Variant, Color> = {
-    primary: 'blue',
+    primary: 'purple',
     secondary: 'gray',
     success: 'green',
     warning: 'yellow',
     danger: 'red',
-    info: 'purple'
+    info: 'blue'
   };
 
   // Resolve the effective color: prefer explicit color, then map variant, default to gray
