@@ -1,4 +1,4 @@
-# gprint Frontend Development Specification
+# Pressly Frontend Development Specification
 
 > **Contract Printing Management System**  
 > Svelte 5 • Bun • TypeScript • Functional Programming
@@ -27,7 +27,7 @@
 
 ## Overview
 
-Frontend application for the **gprint** contract printing management system. Consumes a Go/Oracle REST API for multi-tenant contract lifecycle management including:
+Frontend application for the **Pressly** contract printing management system. Consumes a Go/Oracle REST API for multi-tenant contract lifecycle management including:
 
 - Customer management
 - Service catalog
@@ -90,7 +90,7 @@ Frontend application for the **gprint** contract printing management system. Con
                               │
                               ▼
                    ┌─────────────────────┐
-                   │   gprint Go API     │
+                   │   Pressly Go API   │
                    │   (REST + JWT)      │
                    └─────────────────────┘
 ```
@@ -100,7 +100,7 @@ Frontend application for the **gprint** contract printing management system. Con
 ## Project Structure
 
 ```
-gprint-ui/
+pressly-web/
 ├── bun.lockb
 ├── package.json
 ├── svelte.config.js
@@ -662,7 +662,7 @@ interface AuthState {
   user: { id: string; tenantId: string } | null;
 }
 
-const TOKEN_KEY = 'gprint_token';
+const TOKEN_KEY = 'pressly_token';
 
 const createAuthStore = () => {
   let state = $state<AuthState>({
@@ -988,10 +988,10 @@ export default {
 
 ```bash
 # Create project
-bunx sv create gprint-ui
+bunx sv create pressly-web
 # Select: SvelteKit minimal, TypeScript, Tailwind, ESLint, Prettier
 
-cd gprint-ui
+cd pressly-web
 
 # Install dependencies
 bun add ky zod decimal.js-light date-fns lucide-svelte
@@ -1195,4 +1195,4 @@ export const toastStore = createToastStore();
 
 ---
 
-*Generated for gprint backend v1.0*
+*Generated for Pressly backend v1.0*

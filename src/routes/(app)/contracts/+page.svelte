@@ -87,7 +87,7 @@
 </script>
 
 <svelte:head>
-  <title>Contratos - gprint</title>
+  <title>Contratos - Pressly</title>
 </svelte:head>
 
 <div class="space-y-6">

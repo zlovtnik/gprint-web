@@ -162,7 +162,7 @@
 </script>
 
 <svelte:head>
-  <title>Itens do Contrato - gprint</title>
+  <title>Itens do Contrato - Pressly</title>
 </svelte:head>
 
 <div class="space-y-6">

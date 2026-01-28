@@ -76,7 +76,7 @@
 </script>
 
 <svelte:head>
-  <title>Histórico do Contrato - gprint</title>
+  <title>Histórico do Contrato - Pressly</title>
 </svelte:head>
 
 <div class="space-y-6">

@@ -6,7 +6,7 @@
 </script>
 
 <svelte:head>
-  <title>gprint - Sistema de Contratos</title>
+  <title>Pressly - Sistema de Contratos</title>
   <meta name="description" content="Sistema de Gerenciamento de Contratos de Impressão" />
 </svelte:head>
 

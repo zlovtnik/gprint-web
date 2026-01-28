@@ -58,7 +58,7 @@
 </script>
 
 <svelte:head>
-  <title>Dashboard - gprint</title>
+  <title>Dashboard - Pressly</title>
 </svelte:head>
 
 <div class="space-y-6">

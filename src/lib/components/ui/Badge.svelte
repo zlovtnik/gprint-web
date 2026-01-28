@@ -2,15 +2,31 @@
   import type { Snippet } from 'svelte';
 
   export type Color = 'gray' | 'green' | 'yellow' | 'red' | 'blue' | 'orange' | 'purple';
+  // Variant aliases for semantic naming
+  export type Variant = 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info';
   type Size = 'sm' | 'md';
 
   interface Props {
     color?: Color;
+    variant?: Variant;
     size?: Size;
     children: Snippet;
   }
 
-  let { color = 'gray', size = 'md', children }: Props = $props();
+  let { color, variant, size = 'md', children }: Props = $props();
+
+  // Map variant to color (info uses blue/cyan for informational messaging)
+  const variantToColor: Record<Variant, Color> = {
+    primary: 'purple',
+    secondary: 'gray',
+    success: 'green',
+    warning: 'yellow',
+    danger: 'red',
+    info: 'blue'
+  };
+
+  // Resolve the effective color: prefer explicit color, then map variant, default to gray
+  const effectiveColor = $derived(color ?? (variant ? variantToColor[variant] : 'gray'));
 
   const colors: Record<Color, string> = {
     gray: 'bg-[#1a1a1a] text-[#a0a0a0] border border-[#2a2a2a]',
@@ -28,7 +44,7 @@
   };
 
   // Ensure color is valid
-  const colorClass = $derived(colors[color as Color] ?? colors.gray);
+  const colorClass = $derived(colors[effectiveColor] ?? colors.gray);
   const sizeClass = $derived(sizes[size] ?? sizes.md);
 </script>
 

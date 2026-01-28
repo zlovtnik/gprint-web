@@ -82,7 +82,7 @@
 </script>
 
 <svelte:head>
-  <title>Trabalho de Impressão - gprint</title>
+  <title>Trabalho de Impressão - Pressly</title>
 </svelte:head>
 
 <div class="space-y-6">

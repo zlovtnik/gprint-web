@@ -52,7 +52,7 @@
 </script>
 
 <svelte:head>
-  <title>Login - gprint</title>
+  <title>Login - Pressly</title>
 </svelte:head>
 
 <div class="min-h-screen flex items-center justify-center px-4 relative overflow-hidden bg-black">
@@ -83,7 +83,7 @@
           <Printer class="relative h-12 w-12 text-[#00d4ff]" />
         </div>
         <h1 class="text-4xl font-black text-[#00d4ff] text-glow-electric tracking-wider">
-          GPRINT
+          PRESSLY
         </h1>
         <p class="text-[#787878] mt-2 tracking-wide text-sm">Sistema de Gerenciamento de Contratos</p>
       </div>
@@ -117,7 +117,7 @@
       <div class="mt-8 pt-6 border-t border-[#2a2a2a] text-center">
         <p class="text-xs text-[#5a5a5a] tracking-wider">
           v1.0 • 
-          <span class="text-[#00d4ff]/60">POWERED BY GPRINT</span>
+          <span class="text-[#00d4ff]/60">POWERED BY PRESSLY</span>
         </p>
       </div>
     </div>

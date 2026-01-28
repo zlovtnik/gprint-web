@@ -94,7 +94,7 @@
 </script>
 
 <svelte:head>
-  <title>Gerar Contrato - gprint</title>
+  <title>Gerar Contrato - Pressly</title>
 </svelte:head>
 
 <div class="space-y-6">

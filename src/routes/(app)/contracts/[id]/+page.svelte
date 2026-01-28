@@ -136,7 +136,7 @@
 </script>
 
 <svelte:head>
-  <title>{contract?.contractNumber ?? 'Contrato'} - gprint</title>
+  <title>{contract?.contractNumber ?? 'Contrato'} - Pressly</title>
 </svelte:head>
 
 <div class="space-y-6">

@@ -67,7 +67,7 @@
 </script>
 
 <svelte:head>
-  <title>Clientes - gprint</title>
+  <title>Clientes - Pressly</title>
 </svelte:head>
 
 <div class="space-y-6">

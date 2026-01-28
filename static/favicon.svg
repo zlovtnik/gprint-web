@@ -1,4 +1,31 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="6" fill="#8000ff"/>
-  <text x="16" y="23" font-family="system-ui" font-size="18" font-weight="bold" text-anchor="middle" fill="white">G</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="neonGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#8000ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ff0080;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="48" fill="#000000"/>
+  <circle cx="50" cy="50" r="47" fill="none" stroke="url(#neonGlow)" stroke-width="2" filter="url(#glow)"/>
+  
+  <!-- Stylized P letter -->
+  <g filter="url(#glow)">
+    <!-- Main P stem -->
+    <path d="M 32 25 L 32 75" stroke="#00d4ff" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <!-- P curve -->
+    <path d="M 32 25 C 32 25 70 22 70 40 C 70 58 32 55 32 55" stroke="#00d4ff" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <!-- Accent line (press motion) -->
+    <path d="M 45 65 L 68 65" stroke="#ff0080" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.9"/>
+    <path d="M 50 72 L 65 72" stroke="#8000ff" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.7"/>
+  </g>
 </svg>

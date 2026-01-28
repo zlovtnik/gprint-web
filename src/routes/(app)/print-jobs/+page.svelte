@@ -148,7 +148,7 @@
 </script>
 
 <svelte:head>
-  <title>Fila de Impressão - gprint</title>
+  <title>Fila de Impressão - Pressly</title>
 </svelte:head>
 
 <div class="space-y-6">

@@ -82,7 +82,7 @@
 </script>
 
 <svelte:head>
-  <title>{service?.name ?? 'Serviço'} - gprint</title>
+  <title>{service?.name ?? 'Serviço'} - Pressly</title>
 </svelte:head>
 
 <div class="space-y-6">
